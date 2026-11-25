@@ -1,0 +1,9 @@
+[package]
+name = "prelix-render"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+taffy = { version = "0.16", default-features = false, features = ["alloc"] }
+tiny-skia = { version = "0.12", default-features = false, features = ["no-std-float"] }
+fontdue = { version = "0.9", default-features = false, features = ["hashbrown"] }
