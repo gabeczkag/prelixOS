@@ -3,171 +3,159 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>prelixOS — szybki, lekki system, który wschodzi ze słońcem</title>
-<meta name="description" content="prelixOS: szybki, lekki i kolorowy system operacyjny. Uruchamia się w sekundy, działa płynnie na każdym sprzęcie. Pobierz i zobacz różnicę.">
+<title>prelixOS — szybki, lekki system operacyjny</title>
+<meta name="description" content="prelixOS: szybki, lekki system operacyjny. Uruchamia się w sekundy, działa płynnie na każdym sprzęcie. Pobierz za darmo.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Press+Start+2P&display=swap" rel="stylesheet">
 <style>
-  /* ── 4-BIT PALETTE (16 kolorów) ──
-     #000000 #141233 #2c2a8c #4f7dff #7c5cff #b87fd1 #e88ad2 #ffffff
-     #fff3b0 #ffd23c #f5a623 #e07a1f #d43c3c #3cad9e #8d84b8 #7a3b12 */
   :root {
-    --c-black: #000000; --c-night: #141233; --c-indigo: #2c2a8c; --c-blue: #4f7dff;
-    --c-violet: #7c5cff; --c-lav: #b87fd1; --c-pink: #e88ad2; --c-white: #ffffff;
-    --c-cream: #fff3b0; --c-sun: #ffd23c; --c-gold: #f5a623; --c-orange: #e07a1f;
-    --c-red: #d43c3c; --c-teal: #3cad9e; --c-gray: #8d84b8; --c-brown: #7a3b12;
+    --c-black: #000000;
+    --c-bg: #0b0d17;
+    --c-panel: #161b2e;
+    --c-panel2: #1d2440;
+    --c-line: #000000;
+    --c-lime: #baf34e;
+    --c-blue: #4f7dff;
+    --c-violet: #8a7dff;
+    --c-pink: #ff6fb0;
+    --c-teal: #3ce0c8;
+    --c-cream: #f4f9ee;
+    --c-white: #ffffff;
+    --c-gray: #9aa4c0;
+    --c-dim: #8b93b3;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
     font: 400 17px/1.65 "Space Grotesk", system-ui, sans-serif;
-    background: var(--c-night); color: var(--c-white);
+    background: var(--c-bg); color: var(--c-white);
     min-height: 100vh; overflow-x: hidden;
   }
-  ::selection { background: var(--c-sun); color: var(--c-black); }
+  ::selection { background: var(--c-lime); color: var(--c-black); }
   .pixel { font-family: "Press Start 2P", monospace; }
 
-  /* ── Spokojne tło: noc z delikatnym sprzężeniem pasów przy dnie ── */
-  .sky { position: fixed; inset: 0; z-index: -3;
-    background:
-      repeating-linear-gradient(180deg,
-        rgba(255,255,255,.02) 0 20px, rgba(0,0,0,.10) 20px 40px),
-      linear-gradient(180deg, var(--c-night) 0%, var(--c-night) 55%,
-        var(--c-indigo) 78%, var(--c-violet) 92%, var(--c-gold) 100%);
-  }
-  .sun { position: fixed; left: 50%; bottom: -30vmin; width: 60vmin; height: 60vmin;
-    transform: translateX(-50%); z-index: -2; opacity: .5;
-    background: var(--c-gold); border: 5px solid rgba(0,0,0,.5);
-    clip-path: polygon(0 26%, 6% 26%, 6% 12%, 12% 12%, 12% 6%, 26% 6%, 26% 0,
-      calc(100% - 26%) 0, calc(100% - 26%) 6%, calc(100% - 12%) 6%, calc(100% - 12%) 12%,
-      calc(100% - 6%) 12%, calc(100% - 6%) 26%, 100% 26%,
-      100% calc(100% - 26%), calc(100% - 6%) calc(100% - 26%), calc(100% - 6%) calc(100% - 12%),
-      calc(100% - 12%) calc(100% - 12%), calc(100% - 12%) calc(100% - 6%), calc(100% - 26%) calc(100% - 6%),
-      calc(100% - 26%) 100%, 26% 100%, 26% calc(100% - 6%), 12% calc(100% - 6%), 12% calc(100% - 12%),
-      6% calc(100% - 12%), 6% calc(100% - 26%), 0 calc(100% - 26%));
-    animation: rise 40s steps(8) infinite alternate; }
-  @keyframes rise { to { transform: translateX(-50%) translateY(-12vmin); } }
+  /* tło: granat + kropkowana siatka, bez gradientowych fajerwerków */
+  .bgdots { position: fixed; inset: 0; z-index: -2; pointer-events: none;
+    background-image: radial-gradient(rgba(255,255,255,.055) 1.5px, transparent 1.5px);
+    background-size: 26px 26px; }
+  .glow { position: fixed; left: -12vmax; top: -14vmax; width: 52vmax; height: 52vmax; z-index: -1;
+    background: radial-gradient(circle, rgba(79,125,255,.16), transparent 65%);
+    pointer-events: none; }
+  .glow.b { left: auto; right: -14vmax; top: auto; bottom: -18vmax;
+    background: radial-gradient(circle, rgba(186,243,78,.10), transparent 65%); }
 
   .wrap { max-width: 1140px; margin: 0 auto; padding: 0 clamp(18px, 3vw, 40px); }
 
-  /* ── Block material ── */
+  /* blocky: schodkowe rogi + twardy cień */
   .steps { clip-path: polygon(0 12px, 6px 12px, 6px 6px, 12px 6px, 12px 0,
       calc(100% - 12px) 0, calc(100% - 12px) 6px, calc(100% - 6px) 6px, calc(100% - 6px) 12px, 100% 12px,
       100% calc(100% - 12px), calc(100% - 6px) calc(100% - 12px), calc(100% - 6px) calc(100% - 6px),
       calc(100% - 12px) calc(100% - 6px), calc(100% - 12px) 100%,
       12px 100%, 12px calc(100% - 6px), 6px calc(100% - 6px), 6px calc(100% - 12px), 0 calc(100% - 12px)); }
-  .blk { position: relative; background: #1a1745; border: 3px solid var(--c-black);
-    filter: drop-shadow(10px 10px 0 rgba(0,0,0,.8)); transition: transform .15s steps(3); }
+  .blk { position: relative; background: var(--c-panel); border: 3px solid var(--c-line);
+    filter: drop-shadow(10px 10px 0 rgba(0,0,0,.85)); transition: transform .15s steps(3); }
   .blk:hover { transform: translate(-3px, -3px); }
 
   .tag { display: inline-block; font: 400 11px/1 "Press Start 2P", monospace;
     letter-spacing: .06em; text-transform: uppercase; padding: 10px 14px;
-    border: 3px solid var(--c-black); background: var(--c-sun); color: var(--c-black); }
+    border: 3px solid var(--c-line); background: var(--c-lime); color: var(--c-black); }
 
   /* ── Nav ── */
-  .topbar { position: sticky; top: 0; z-index: 20; background: rgba(20,18,51,.92);
-    backdrop-filter: blur(8px); border-bottom: 3px solid var(--c-black); }
+  .topbar { position: sticky; top: 0; z-index: 20; background: rgba(11,13,23,.94);
+    backdrop-filter: blur(8px); border-bottom: 3px solid var(--c-line); }
   .topbar .in { max-width: 1140px; margin: 0 auto; padding: 16px clamp(18px, 3vw, 40px);
     display: flex; align-items: center; gap: 28px; }
   .logo { font-family: "Press Start 2P", monospace; font-size: 15px; text-decoration: none; color: var(--c-white); }
-  .logo b { color: var(--c-sun); }
+  .logo b { color: var(--c-lime); }
   .topbar .links { display: flex; gap: 24px; margin-left: auto; }
-  .topbar a:not(.logo) { color: var(--c-lav); text-decoration: none; font-size: 15px; font-weight: 500; }
-  .topbar a:not(.logo):hover { color: var(--c-sun); }
+  .topbar a:not(.logo) { color: var(--c-dim); text-decoration: none; font-size: 15px; font-weight: 500; }
+  .topbar a:not(.logo):hover { color: var(--c-lime); }
   .btn { display: inline-block; padding: 14px 28px; font-size: 15px; font-weight: 700;
-    font-family: "Space Grotesk", sans-serif;
-    text-decoration: none; color: var(--c-black); background: var(--c-sun);
-    border: 3px solid var(--c-black); box-shadow: 6px 6px 0 var(--c-black);
+    text-decoration: none; color: var(--c-black); background: var(--c-lime);
+    border: 3px solid var(--c-line); box-shadow: 6px 6px 0 var(--c-line);
     transition: transform .12s steps(2), box-shadow .12s steps(2); }
-  .btn:hover { transform: translate(-3px, -3px); box-shadow: 9px 9px 0 var(--c-black); }
-  .btn:active { transform: translate(4px, 4px); box-shadow: 2px 2px 0 var(--c-black); }
-  .btn.ghost { background: transparent; color: var(--c-white); box-shadow: 6px 6px 0 rgba(255,210,60,.75); }
-  .btn.ghost:hover { box-shadow: 9px 9px 0 rgba(255,210,60,.75); }
+  .btn:hover { transform: translate(-3px, -3px); box-shadow: 9px 9px 0 var(--c-line); }
+  .btn:active { transform: translate(4px, 4px); box-shadow: 2px 2px 0 var(--c-line); }
+  .btn.ghost { background: var(--c-panel2); color: var(--c-white); box-shadow: 6px 6px 0 rgba(79,125,255,.8); }
+  .btn.ghost:hover { box-shadow: 9px 9px 0 rgba(79,125,255,.8); }
   .btn.sm { padding: 10px 18px; font-size: 13.5px; }
 
   /* ── Hero ── */
   .hero { padding: clamp(70px, 11vh, 120px) 20px 40px; text-align: center; }
   .hero .tag { margin-bottom: 34px; }
-  h1 { font-size: clamp(42px, 6.4vw, 88px); line-height: 1.02; letter-spacing: -0.035em; font-weight: 700; margin: 0 auto 22px; max-width: 15ch; }
-  h1 .sunword { color: var(--c-sun); }
-  .hero p.sub { font-size: clamp(16px, 1.8vw, 20px); color: var(--c-lav); max-width: 56ch; margin: 0 auto 36px; }
+  h1 { font-size: clamp(42px, 6.4vw, 88px); line-height: 1.02; letter-spacing: -0.035em; font-weight: 700; margin: 0 auto 22px; max-width: 16ch; }
+  h1 .acc { color: var(--c-lime); }
+  .hero p.sub { font-size: clamp(16px, 1.8vw, 20px); color: var(--c-dim); max-width: 56ch; margin: 0 auto 36px; }
   .hero .cta { display: flex; gap: 18px; justify-content: center; flex-wrap: wrap; align-items: center; }
   .hero .ver { color: var(--c-gray); font-size: 14px; }
 
   /* ── Desktop mockup ── */
-  .desk { max-width: 920px; margin: 64px auto 0; border: 3px solid var(--c-black);
-    filter: drop-shadow(14px 14px 0 rgba(0,0,0,.8)); }
+  .desk { max-width: 920px; margin: 64px auto 0; border: 3px solid var(--c-line);
+    filter: drop-shadow(14px 14px 0 rgba(0,0,0,.85)); }
   .screen { background:
-      linear-gradient(180deg, var(--c-night) 0%, var(--c-indigo) 55%, var(--c-violet) 78%, var(--c-gold) 96%, var(--c-sun) 100%);
+      radial-gradient(rgba(255,255,255,.05) 1.5px, transparent 1.5px) 0 0/26px 26px,
+      linear-gradient(180deg, var(--c-panel2) 0%, var(--c-bg) 100%);
     min-height: 420px; position: relative; overflow: hidden; }
-  .screen .msun { position: absolute; left: 50%; bottom: -60px; width: 220px; height: 220px;
-    transform: translateX(-50%); background: var(--c-sun);
-    border: 4px solid rgba(0,0,0,.7);
-    clip-path: polygon(0 26%, 6% 26%, 6% 12%, 12% 12%, 12% 6%, 26% 6%, 26% 0,
-      calc(100% - 26%) 0, calc(100% - 26%) 6%, calc(100% - 12%) 6%, calc(100% - 12%) 12%,
-      calc(100% - 6%) 12%, calc(100% - 6%) 26%, 100% 26%,
-      100% calc(100% - 26%), calc(100% - 6%) calc(100% - 26%), calc(100% - 6%) calc(100% - 12%),
-      calc(100% - 12%) calc(100% - 12%), calc(100% - 12%) calc(100% - 6%), calc(100% - 26%) calc(100% - 6%),
-      calc(100% - 26%) 100%, 26% 100%, 26% calc(100% - 6%), 12% calc(100% - 6%), 12% calc(100% - 12%),
-      6% calc(100% - 12%), 6% calc(100% - 26%), 0 calc(100% - 26%)); }
   .win { position: absolute; left: 44px; top: 40px; width: min(430px, 72%);
-    background: rgba(10, 8, 32, .96); border: 3px solid var(--c-black);
-    box-shadow: 8px 8px 0 rgba(0,0,0,.45); }
-  .win .bar { background: var(--c-indigo); border-bottom: 3px solid var(--c-black);
+    background: var(--c-panel); border: 3px solid var(--c-line);
+    box-shadow: 8px 8px 0 rgba(0,0,0,.6); }
+  .win .bar { background: var(--c-panel2); border-bottom: 3px solid var(--c-line);
     display: flex; gap: 7px; align-items: center; padding: 9px 12px; }
-  .win .bar s { width: 11px; height: 11px; background: var(--c-sun); border: 2px solid var(--c-black); }
-  .win .bar s:nth-child(2) { background: var(--c-lav); }
-  .win .bar s:nth-child(3) { background: var(--c-red); }
-  .win .bar span { font: 400 9px "Press Start 2P", monospace; color: var(--c-lav); margin-left: auto; }
+  .win .bar s { width: 11px; height: 11px; background: var(--c-lime); border: 2px solid var(--c-line); }
+  .win .bar s:nth-child(2) { background: var(--c-blue); }
+  .win .bar s:nth-child(3) { background: var(--c-pink); }
+  .win .bar span { font: 400 9px "Press Start 2P", monospace; color: var(--c-dim); margin-left: auto; }
   .win .body { padding: 28px 24px; }
-  .win .body .hi { font-family: "Press Start 2P", monospace; font-size: 15px; color: var(--c-sun); line-height: 1.7; }
-  .win .body p { color: var(--c-lav); font-size: 14.5px; margin-top: 12px; }
+  .win .body .hi { font-family: "Press Start 2P", monospace; font-size: 15px; color: var(--c-lime); line-height: 1.7; }
+  .win .body p { color: var(--c-dim); font-size: 14.5px; margin-top: 12px; }
   .win .body .dos { display: flex; gap: 10px; margin-top: 20px; }
-  .win .body .dos i { width: 40px; height: 40px; border: 3px solid var(--c-black); display: grid; place-items: center;
-    font-style: normal; font-size: 18px; background: var(--c-indigo); }
-  .win .body .dos i:nth-child(2) { background: var(--c-violet); }
-  .win .body .dos i:nth-child(3) { background: var(--c-blue); }
+  .win .body .dos i { width: 40px; height: 40px; border: 3px solid var(--c-line); display: grid; place-items: center;
+    font-style: normal; font-size: 18px; background: var(--c-panel2); }
+  .win .body .dos i:nth-child(2) { background: var(--c-blue); }
+  .win .body .dos i:nth-child(3) { background: var(--c-violet); }
   .deskbar { position: absolute; left: 0; right: 0; bottom: 0; height: 56px;
-    background: rgba(10, 8, 32, .96); border-top: 3px solid var(--c-black);
+    background: var(--c-panel); border-top: 3px solid var(--c-line);
     display: flex; align-items: center; gap: 12px; padding: 0 14px; }
-  .deskbar .start { background: var(--c-sun); color: var(--c-black); font: 400 9px "Press Start 2P", monospace;
-    padding: 10px 12px; border: 3px solid var(--c-black); }
-  .deskbar .app { width: 36px; height: 36px; border: 3px solid var(--c-black);
-    display: grid; place-items: center; font-size: 17px; background: var(--c-indigo); }
+  .deskbar .start { background: var(--c-lime); color: var(--c-black); font: 400 9px "Press Start 2P", monospace;
+    padding: 10px 12px; border: 3px solid var(--c-line); }
+  .deskbar .app { width: 36px; height: 36px; border: 3px solid var(--c-line);
+    display: grid; place-items: center; font-size: 17px; background: var(--c-panel2); }
   .deskbar .app:nth-child(3) { background: var(--c-violet); }
   .deskbar .app:nth-child(4) { background: var(--c-blue); }
-  .deskbar .app:nth-child(5) { background: var(--c-gold); }
+  .deskbar .app:nth-child(5) { background: var(--c-pink); }
   .deskbar .clock { margin-left: auto; font: 400 10px "Press Start 2P", monospace;
-    color: var(--c-sun); background: var(--c-black); padding: 10px 12px; }
+    color: var(--c-lime); background: var(--c-black); padding: 10px 12px; }
 
   /* ── Sections ── */
   section.block { padding: 72px 0; }
   .head { text-align: center; margin-bottom: 44px; }
   .head .tag { margin-bottom: 22px; }
   section h2 { font-size: clamp(30px, 4.4vw, 52px); letter-spacing: -0.03em; font-weight: 700; margin-bottom: 12px; }
-  .lead { color: var(--c-lav); max-width: 62ch; margin: 0 auto; font-size: 17.5px; }
+  .lead { color: var(--c-dim); max-width: 62ch; margin: 0 auto; font-size: 17.5px; }
 
   .grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
   .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
   .card { padding: 30px 28px; }
-  .card .chip { width: 52px; height: 52px; border: 3px solid var(--c-black); display: grid; place-items: center;
-    font-size: 24px; background: var(--c-indigo); margin-bottom: 20px; box-shadow: 5px 5px 0 rgba(0,0,0,.6); }
-  .c1 .chip { background: var(--c-sun); } .c2 .chip { background: var(--c-pink); }
-  .c3 .chip { background: var(--c-teal); } .c4 .chip { background: var(--c-violet); }
+  .card .chip { width: 52px; height: 52px; border: 3px solid var(--c-line); display: grid; place-items: center;
+    font-size: 24px; background: var(--c-panel2); margin-bottom: 20px; box-shadow: 5px 5px 0 rgba(0,0,0,.7); }
+  .c1 .chip { background: var(--c-lime); color: var(--c-black); }
+  .c2 .chip { background: var(--c-pink); }
+  .c3 .chip { background: var(--c-teal); color: var(--c-black); }
+  .c4 .chip { background: var(--c-violet); }
   .card h3 { font-size: 18.5px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.01em; }
-  .card p { font-size: 15px; color: var(--c-lav); }
+  .card p { font-size: 15px; color: var(--c-dim); }
 
   .faq { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
   .q { padding: 26px 28px; }
   .q b { display: block; font-size: 16.5px; font-weight: 700; margin-bottom: 10px; color: var(--c-cream); }
-  .q p { font-size: 15px; color: var(--c-lav); }
+  .q p { font-size: 15px; color: var(--c-dim); }
 
   .dlband { display: flex; gap: 30px; align-items: center; justify-content: space-between; flex-wrap: wrap;
-    padding: clamp(36px, 5vw, 58px); border: 3px solid var(--c-black);
-    background: linear-gradient(0deg, var(--c-gold) 0 50%, var(--c-sun) 50% 100%);
-    filter: drop-shadow(12px 12px 0 rgba(0,0,0,.8)); }
-  .dlband h2 { color: var(--c-black); margin-bottom: 8px; }
-  .dlband p { color: var(--c-brown); font-weight: 500; max-width: 48ch; }
+    padding: clamp(36px, 5vw, 58px); border: 3px solid var(--c-line);
+    background: var(--c-panel2);
+    filter: drop-shadow(12px 12px 0 rgba(0,0,0,.85)); }
+  .dlband h2 { margin-bottom: 8px; }
+  .dlband p { color: var(--c-dim); max-width: 48ch; }
 
   footer { text-align: center; padding: 56px 0 60px; color: var(--c-gray); font-size: 14px; }
   footer .flink { color: var(--c-gray); }
@@ -177,13 +165,13 @@
     .topbar .links { display: none; }
     .desk { margin-top: 48px; }
   }
-  @media (prefers-reduced-motion: reduce) { .sun { animation: none; } }
 </style>
 </head>
 <body>
 
-<div class="sky" aria-hidden="true"></div>
-<div class="sun" aria-hidden="true"></div>
+<div class="bgdots" aria-hidden="true"></div>
+<div class="glow" aria-hidden="true"></div>
+<div class="glow b" aria-hidden="true"></div>
 
 <header class="topbar">
   <div class="in">
@@ -200,10 +188,10 @@
 <main class="wrap">
 
   <section class="hero">
-    <span class="tag">prelixOS 0.1 — wschód</span>
-    <h1>Szybki, lekki system.<br><span class="sunword">Wschodzi ze słońcem.</span></h1>
-    <p class="sub">prelixOS wstaje w kilka sekund, działa płynnie na każdym sprzęcie i wygląda jak poranek —
-       codziennie. Zainstalujesz go obok obecnego systemu, bez poświęcania niczego.</p>
+    <span class="tag">prelixOS 0.1</span>
+    <h1>Szybki, lekki system.<br><span class="acc">Wstaje w sekundy.</span></h1>
+    <p class="sub">prelixOS działa płynnie na każdym sprzęcie, nie wtrąca się w to, co robisz,
+       i jest gotowy do pracy chwilę po włączeniu. Zainstalujesz go obok obecnego systemu, bez poświęcania niczego.</p>
     <div class="cta">
       <a class="btn" href="#download">Pobierz za darmo</a>
       <a class="btn ghost" href="#why">Zobacz, co potrafi</a>
@@ -212,19 +200,18 @@
 
     <div class="desk steps" aria-hidden="true">
       <div class="screen">
-        <div class="msun"></div>
         <div class="win">
           <div class="bar"><s></s><s></s><s></s><span>WITAJ</span></div>
           <div class="body">
             <div class="hi">Witaj w prelixOS.</div>
-            <p>Wszystko pod ręką, wszystko szybko. Miłego dnia.</p>
+            <p>Wszystko pod ręką, wszystko szybko. Dobry dzień zaczyna się od szybkiego startu.</p>
             <div class="dos"><i>📁</i><i>🌐</i><i>🎵</i></div>
           </div>
         </div>
         <div class="deskbar">
           <span class="start">preli</span>
           <span class="app">📁</span><span class="app">🌐</span><span class="app">🎵</span><span class="app">🧮</span>
-          <span class="clock">6:00</span>
+          <span class="clock">9:00</span>
         </div>
       </div>
     </div>
@@ -233,13 +220,13 @@
   <section class="block" id="new">
     <div class="head">
       <span class="tag">co nowego</span>
-      <h2>Wersja 0.1 „Wschód”</h2>
+      <h2>Wersja 0.1</h2>
       <p class="lead">Pierwsza publiczna wersja. Mało słów, dużo efektu — to, co ma działać, działa.</p>
     </div>
     <div class="grid4">
       <div class="card blk steps c1"><span class="chip">⏱️</span><h3>Start w sekundy</h3><p>Włączasz komputer i nie czekasz. Pulpit jest, zanim skończysz mrugać.</p></div>
       <div class="card blk steps c2"><span class="chip">🪶</span><h3>Żyje na starym sprzęcie</h3><p>Laptopy sprzed dekady dostają drugie życie. Nic w zamian.</p></div>
-      <div class="card blk steps c3"><span class="chip">🎨</span><h3>Ładny od progu</h3><p>Ciepła paleta, spokojny pulpit. Ładnie dziś, ładniej jutro.</p></div>
+      <div class="card blk steps c3"><span class="chip">🎨</span><h3>Ładny od progu</h3><p>Spokojny, czytelny pulpit. Ładnie dziś, ładniej jutro.</p></div>
       <div class="card blk steps c4"><span class="chip">🔒</span><h3>Twoje dane zostają u ciebie</h3><p>Zero podsłuchu, zero reklam. System pracuje dla ciebie.</p></div>
     </div>
   </section>
@@ -275,7 +262,7 @@
     <div class="dlband steps">
       <div>
         <h2>Pobierz prelixOS 0.1</h2>
-        <p>Nagrój na pendrive, uruchom i za kilka minut patrz, jak Twój komputer wschodzi. Za darmo.</p>
+        <p>Nagrój na pendrive, uruchom i za kilka minut pracujesz na nowym systemie. Za darmo.</p>
       </div>
       <a class="btn" href="https://github.com/gabeczkag/prelixOS" target="_blank" rel="noopener">Pobierz teraz</a>
     </div>
