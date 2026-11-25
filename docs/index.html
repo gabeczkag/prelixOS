@@ -4,87 +4,85 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>prelixOS — system, w którym UI jest HTML-em</title>
-<meta name="description" content="prelixOS: minimalistyczny system operacyjny w Ruście, który renderuje HTML/CSS prosto na framebufferze. Frontend w HTML, backend w Rust.">
+<meta name="description" content="prelixOS: napisz interfejs w HTML — system sam wyrenderuje go prosto na ekranie.">
 <style>
   :root {
-    --glass-tint: 220 160 255;
-    --ring-light: rgba(255, 255, 255, 0.75);
-    --ring-dark: rgba(10, 10, 30, 0.35);
-    --ink: #f2f0ff;
-    --ink-dim: #b9b3d9;
+    --ring-light: rgba(255, 244, 214, 0.8);
+    --ink: #f6f2ff;
+    --ink-dim: #cfc7ea;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html { scroll-behavior: smooth; }
   body {
     font: 16px/1.6 "SF Pro Display", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
-    background: #06040f;
+    background: #0b0a1e;
     color: var(--ink);
     min-height: 100vh;
     overflow-x: hidden;
   }
-  ::selection { background: rgba(167, 108, 255, 0.4); }
+  ::selection { background: rgba(255, 214, 79, 0.35); }
 
-  /* ── Animated colour field the glass refracts ─────────────────── */
-  .field { position: fixed; inset: -20vmax; z-index: -2; filter: saturate(1.15); }
+  /* ── Sunrise field: blue-violet sky, yellow sun ────────────────── */
+  .field { position: fixed; inset: -20vmax; z-index: -2; }
+  .sky { position: fixed; inset: 0; z-index: -3;
+         background: linear-gradient(180deg, #1b1a4b 0%, #2c2a7a 34%, #4d3f9e 58%, #8f6fd1 78%, #e8b35a 100%); }
   .field i {
     position: absolute; display: block; border-radius: 50%;
-    filter: blur(70px); opacity: 0.85; will-change: transform;
+    filter: blur(80px); opacity: 0.9; will-change: transform;
   }
-  .field i:nth-child(1)  { width: 55vmax; height: 55vmax; left: -8vmax;  top: -12vmax; background: radial-gradient(circle at 35% 35%, #7a3cff, #2b0a6e 70%); animation: drift1 23s ease-in-out infinite alternate; }
-  .field i:nth-child(2)  { width: 42vmax; height: 42vmax; right: -6vmax; top: 8vmax;   background: radial-gradient(circle at 60% 40%, #ff3ca4, #6e0a3c 70%); animation: drift2 19s ease-in-out infinite alternate; }
-  .field i:nth-child(3)  { width: 48vmax; height: 48vmax; left: 22vmax; bottom: -18vmax; background: radial-gradient(circle at 45% 55%, #21d4fd, #0a3a6e 70%); animation: drift3 27s ease-in-out infinite alternate; }
-  .field i:nth-child(4)  { width: 30vmax; height: 30vmax; right: 18vmax; bottom: 2vmax; background: radial-gradient(circle at 50% 50%, #ffb53c, #6e4a0a 70%); opacity: .7; animation: drift1 31s ease-in-out infinite alternate-reverse; }
-  @keyframes drift1 { to { transform: translate(9vmax, 12vmax) scale(1.18); } }
-  @keyframes drift2 { to { transform: translate(-13vmax, 6vmax) scale(0.85); } }
-  @keyframes drift3 { to { transform: translate(6vmax, -10vmax) scale(1.12); } }
-  .grain { position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: .5; mix-blend-mode: overlay;
+  .field i:nth-child(1) { width: 60vmax; height: 60vmax; left: -10vmax; top: -14vmax; background: radial-gradient(circle at 40% 40%, #4338ca, #1e1b6e 70%); animation: drift1 26s ease-in-out infinite alternate; }
+  .field i:nth-child(2) { width: 46vmax; height: 46vmax; right: -8vmax; top: 12vmax; background: radial-gradient(circle at 55% 40%, #6d28d9, #2e1065 70%); animation: drift2 21s ease-in-out infinite alternate; }
+  .field i:nth-child(3) { width: 55vmax; height: 55vmax; left: 20vmax; bottom: -20vmax; background: radial-gradient(circle at 50% 55%, #ffd23c, #e07a1f 62%, transparent 75%); animation: drift3 29s ease-in-out infinite alternate; }
+  .field i:nth-child(4) { width: 32vmax; height: 32vmax; right: 16vmax; bottom: 0vmax; background: radial-gradient(circle at 50% 50%, #ffef9e, #f5a623 70%); opacity: .8; animation: drift1 33s ease-in-out infinite alternate-reverse; }
+  @keyframes drift1 { to { transform: translate(10vmax, 12vmax) scale(1.16); } }
+  @keyframes drift2 { to { transform: translate(-14vmax, 6vmax) scale(0.85); } }
+  @keyframes drift3 { to { transform: translate(6vmax, -12vmax) scale(1.1); } }
+  .grain { position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: .45; mix-blend-mode: overlay;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.35'/%3E%3C/svg%3E"); }
 
   /* ── Liquid glass material ────────────────────────────────────────
-     Not glassmorphism: the lensing lives on the EDGE (displacement
-     refraction + specular ring), the body stays clear and picks up
-     the colour behind it. Fallback order: try refractive filter,
-     drop to blur+saturation if url() filter unsupported.            */
+     Lensing lives on the EDGE (displacement refraction + specular
+     ring); the body stays clear and picks up the colour behind it.
+     Fallback: blur+saturation where url() filters unsupported.      */
   .lg {
     position: relative;
     isolation: isolate;
     border-radius: 28px;
-    /* clear body — colour comes from behind, refracted */
-    backdrop-filter: blur(3px) saturate(160%) brightness(1.06);
-    -webkit-backdrop-filter: blur(3px) saturate(160%) brightness(1.06);
+    backdrop-filter: blur(3px) saturate(165%) brightness(1.08);
+    -webkit-backdrop-filter: blur(3px) saturate(165%) brightness(1.08);
   }
   @supports (backdrop-filter: url(#lg-lens)) {
-    .lg { backdrop-filter: url(#lg-lens) saturate(160%) brightness(1.06); }
+    .lg { backdrop-filter: url(#lg-lens) saturate(165%) brightness(1.08); }
   }
-  .lg::before {  /* liquid lens edge: specular ring + chromatic rim */
+  .lg::before {  /* liquid lens edge: specular ring + warm rim */
     content: ""; position: absolute; inset: 0; border-radius: inherit;
     padding: 1.4px; z-index: 2; pointer-events: none;
     background: linear-gradient(135deg,
-      rgba(255,255,255,.95) 0%, rgba(255,255,255,.25) 18%,
-      transparent 40%, transparent 62%, rgba(255,255,255,.35) 82%, rgba(255,255,255,.9) 100%);
+      rgba(255,248,220,.95) 0%, rgba(255,226,140,.35) 18%,
+      transparent 40%, transparent 62%, rgba(216,180,254,.4) 82%, rgba(255,244,214,.95) 100%);
     -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
     -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
     mask-composite: exclude;
   }
-  .lg::after {  /* inner sheen: top light pool + bottom subtle darkness */
+  .lg::after {  /* inner sheen: top light pool + bottom warmth */
     content: ""; position: absolute; inset: 0; border-radius: inherit;
     pointer-events: none; z-index: 1;
     background:
-      radial-gradient(120% 65% at 50% -18%, rgba(255,255,255,.32), transparent 60%),
-      radial-gradient(140% 80% at 50% 125%, rgba(5,5,25,.35), transparent 55%);
+      radial-gradient(120% 65% at 50% -18%, rgba(255,250,235,.34), transparent 60%),
+      radial-gradient(140% 80% at 50% 125%, rgba(80,30,60,.28), transparent 55%);
     box-shadow:
-      inset 0 0 24px rgba(255,255,255,.08),
-      inset 0 1px 0 rgba(255,255,255,.35),
-      0 22px 60px rgba(0,0,10,.45);
+      inset 0 0 24px rgba(255,236,190,.1),
+      inset 0 1px 0 rgba(255,248,220,.4),
+      0 22px 60px rgba(20,10,50,.5);
   }
   .lg > * { position: relative; z-index: 3; }
 
   /* cursor-tracked specular kiss */
   .lg.live::after {
     background:
-      radial-gradient(9rem 9rem at var(--mx, 50%) var(--my, -30%), rgba(255,255,255,.28), transparent 70%),
-      radial-gradient(120% 65% at 50% -18%, rgba(255,255,255,.28), transparent 60%),
-      radial-gradient(140% 80% at 50% 125%, rgba(5,5,25,.35), transparent 55%);
+      radial-gradient(9rem 9rem at var(--mx, 50%) var(--my, -30%), rgba(255,240,200,.3), transparent 70%),
+      radial-gradient(120% 65% at 50% -18%, rgba(255,250,235,.3), transparent 60%),
+      radial-gradient(140% 80% at 50% 125%, rgba(80,30,60,.28), transparent 55%);
   }
 
   .wrap { max-width: 1080px; margin: 0 auto; padding: 0 clamp(20px, 4vw, 44px); }
@@ -94,50 +92,47 @@
         padding: 0 clamp(20px, 4vw, 44px); }
   .nav.lg { display: flex; align-items: center; gap: 20px; padding: 12px 22px; border-radius: 999px; }
   .logo { font-weight: 800; letter-spacing: -0.02em; font-size: 19px; text-decoration: none; color: var(--ink); }
-  .logo b { background: linear-gradient(90deg, #c084fc, #818cf8, #22d3ee); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .logo b { background: linear-gradient(90deg, #fbbf24, #fde68a, #c4b5fd); -webkit-background-clip: text; background-clip: text; color: transparent; }
   .nav .links { display: flex; gap: 22px; margin-left: auto; }
   .nav a { color: var(--ink-dim); text-decoration: none; font-size: 14.5px; font-weight: 500; transition: color .2s; }
   .nav a:hover { color: #fff; }
-  .pill { display: inline-block; padding: 9px 20px; border-radius: 999px; font-size: 14px; font-weight: 650;
-          color: #fff; text-decoration: none;
-          background: linear-gradient(135deg, rgba(167,108,255,.85), rgba(34,211,238,.75));
-          box-shadow: 0 6px 24px rgba(140, 80, 255, .45), inset 0 1px 0 rgba(255,255,255,.45);
+  .pill { display: inline-block; padding: 9px 20px; border-radius: 999px; font-size: 14px; font-weight: 700;
+          color: #2a1602; text-decoration: none;
+          background: linear-gradient(135deg, #fde047, #fb923c 55%, #a78bfa 130%);
+          box-shadow: 0 6px 26px rgba(250, 180, 70, .5), inset 0 1px 0 rgba(255,255,255,.6);
           transition: transform .18s ease, box-shadow .18s ease; }
-  .pill:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 10px 34px rgba(140, 80, 255, .6), inset 0 1px 0 rgba(255,255,255,.55); }
+  .pill:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 10px 36px rgba(250, 180, 70, .65), inset 0 1px 0 rgba(255,255,255,.7); }
 
   /* ── Hero ── */
-  .hero { text-align: center; padding: clamp(70px, 12vh, 130px) 0 60px; }
-  .badge { display: inline-flex; align-items: center; gap: 8px; padding: 8px 18px; border-radius: 999px;
-           font-size: 13px; font-weight: 600; color: var(--ink-dim); }
-  .badge .dot { width: 8px; height: 8px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 12px #4ade80; }
-  h1 { font-size: clamp(44px, 7.5vw, 84px); line-height: 1.02; letter-spacing: -0.035em; font-weight: 800; margin: 26px 0 20px; }
-  h1 span { background: linear-gradient(95deg, #e9d5ff, #a78bfa 35%, #67e8f9 75%, #f0abfc);
+  .hero { text-align: center; padding: clamp(80px, 14vh, 150px) 0 60px; }
+  h1 { font-size: clamp(46px, 7.8vw, 90px); line-height: 1.02; letter-spacing: -0.035em; font-weight: 800; margin: 0 0 22px; }
+  h1 span { background: linear-gradient(95deg, #fef08a, #fbbf24 40%, #e9a1f5 80%, #c4b5fd);
             -webkit-background-clip: text; background-clip: text; color: transparent; }
-  .hero p.sub { max-width: 620px; margin: 0 auto 36px; font-size: clamp(16px, 2vw, 19px); color: var(--ink-dim); }
+  .hero p.sub { max-width: 640px; margin: 0 auto 38px; font-size: clamp(16px, 2vw, 19px); color: var(--ink-dim); }
   .cta { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
   .ghost { display: inline-block; padding: 9px 20px; border-radius: 999px; font-size: 14px; font-weight: 650;
            color: var(--ink); text-decoration: none; }
 
   /* ── Glass code window ── */
-  .demo { margin: 40px auto 0; max-width: 780px; text-align: left; }
+  .demo { margin: 40px auto 0; max-width: 760px; text-align: left; }
   .demo .bar { display: flex; gap: 8px; padding: 16px 20px 0; }
-  .demo .bar s { width: 11px; height: 11px; border-radius: 50%; background: rgba(255,255,255,.28); }
+  .demo .bar s { width: 11px; height: 11px; border-radius: 50%; background: rgba(255,255,255,.3); }
   .demo pre { padding: 18px 24px 24px; overflow-x: auto; font: 13.5px/1.7 "SF Mono", "JetBrains Mono", ui-monospace, monospace; }
-  .demo .tag { color: #f0abfc; } .demo .attr { color: #c4b5fd; } .demo .sel { color: #67e8f9; } .demo .val { color: #fde68a; } .demo .com { color: #7c7a9c; }
+  .demo .tag { color: #fde68a; } .demo .attr { color: #d8c9ff; } .demo .sel { color: #a5d8ff; } .demo .val { color: #ffd23c; } .demo .com { color: #8f86b8; }
 
   /* ── Features ── */
   .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 22px; padding: 50px 0 90px; }
   .card.lg { padding: 28px 26px; }
-  .card .ico { font-size: 30px; display: block; margin-bottom: 14px; filter: drop-shadow(0 4px 14px rgba(167,108,255,.5)); }
+  .card .ico { font-size: 30px; display: block; margin-bottom: 14px; filter: drop-shadow(0 4px 14px rgba(250,180,70,.55)); }
   .card h3 { font-size: 17.5px; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 8px; }
   .card p { font-size: 14.5px; color: var(--ink-dim); }
 
   .pipe { text-align: center; padding: 20px 0 110px; }
   .pipe h2 { font-size: clamp(26px, 4vw, 40px); letter-spacing: -0.03em; font-weight: 800; margin-bottom: 14px; }
   .pipe p { color: var(--ink-dim); max-width: 560px; margin: 0 auto 30px; }
-  code.inline { font: 13px "SF Mono", ui-monospace, monospace; background: rgba(255,255,255,.09); padding: 3px 9px; border-radius: 8px; }
+  code.inline { font: 13px "SF Mono", ui-monospace, monospace; background: rgba(255,255,255,.1); padding: 3px 9px; border-radius: 8px; }
 
-  footer { text-align: center; padding: 34px 0 44px; color: #6f6a8f; font-size: 13.5px; }
+  footer { text-align: center; padding: 34px 0 44px; color: #a89fc4; font-size: 13.5px; }
 
   @media (max-width: 640px) { .nav .links { display: none; } }
   @media (prefers-reduced-motion: reduce) {
@@ -156,6 +151,7 @@
   </filter>
 </svg>
 
+<div class="sky" aria-hidden="true"></div>
 <div class="field" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
 <div class="grain" aria-hidden="true"></div>
 
@@ -163,9 +159,9 @@
   <div class="nav lg live">
     <a class="logo" href="#">preli<b>xOS</b></a>
     <div class="links">
-      <a href="#demo">Renderer</a>
-      <a href="#features">Stack</a>
-      <a href="#road">Roadmapa</a>
+      <a href="#demo">Zobacz</a>
+      <a href="#features">Co potrafi</a>
+      <a href="#road">Dalej</a>
     </div>
     <a class="pill" href="https://github.com/gabeczkag/prelixOS" target="_blank" rel="noopener">GitHub</a>
   </div>
@@ -173,46 +169,44 @@
 
 <main class="wrap">
   <section class="hero">
-    <span class="badge lg"><span class="dot"></span> w budowie — commity codziennie</span>
-    <h1>Frontend w HTML.<br><span>Backend w Rust.</span></h1>
-    <p class="sub">prelixOS to system operacyjny, w którym interfejs opisujesz zwykłym HTML-em,
-       a cały silnik — parser, layout, rasteryzacja — działa w&nbsp;Rust prosto na framebufferze. Bez przeglądarki, bez JS — tylko deklaratywne UI.</p>
+    <h1>UI piszesz w HTML.<br><span>To system operacyjny.</span></h1>
+    <p class="sub">prelixOS wyrenderuje Twój HTML prosto na ekranie — tagi, kolory, układ, wszystko
+       dokładnie tak, jak to opiszesz. Bez przeglądarki, bez zbędnej machinerii: twój markup staje się pulpitem.</p>
     <div class="cta">
       <a class="pill" href="https://github.com/gabeczkag/prelixOS" target="_blank" rel="noopener">Zobacz kod</a>
-      <a class="ghost lg" href="#demo">Jak to działa ↓</a>
+      <a class="ghost lg" href="#demo">Jak to wygląda ↓</a>
     </div>
 
     <div class="demo lg" id="demo">
       <div class="bar" aria-hidden="true"><s></s><s></s><s></s></div>
-<pre><span class="com">// stronie udajesz layout, system resztę — prelix-render, ~no_std</span>
-<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="val">"okno"</span><span class="tag">&gt;</span>
+<pre><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="val">"okno"</span><span class="tag">&gt;</span>
   <span class="tag">&lt;span&gt;</span>prelixOS<span class="tag">&lt;/span&gt;</span>
 <span class="tag">&lt;/div&gt;</span>
 
-<span class="sel">.okno</span> { <span class="attr">display</span>: <span class="val">flex</span>; <span class="attr">background-color</span>: <span class="val">#7a3cff</span>;
-        <span class="attr">padding</span>: <span class="val">10px 20%</span>; <span class="attr">border</span>: <span class="val">4px solid #000</span>; }
+<span class="sel">.okno</span> { <span class="attr">display</span>: <span class="val">flex</span>; <span class="attr">background-color</span>: <span class="val">#ffd23c</span>;
+        <span class="attr">padding</span>: <span class="val">10px 20%</span>; <span class="attr">border</span>: <span class="val">4px solid #2c2a7a</span>; }
 
-<span class="com">$ ./run.sh   →  HTML wyrenderowany prosto na framebuffer w QEMU</span></pre>
+<span class="com">→ i to już jest okno aplikacji na pulpicie systemu</span></pre>
     </div>
   </section>
 
   <section class="features" id="features">
-    <div class="card lg live"><span class="ico">⚙️</span><h3>no_std od rdzenia</h3><p>Cały renderer kompiluje się bez biblioteki standardowej — ten sam kod działa w kernelu i na Linuksie.</p></div>
-    <div class="card lg live"><span class="ico">📐</span><h3>Flexbox na taffy</h3><p>Layout liczony silnikiem taffy: flex-direction, padding, margin, jednostki px i&nbsp;% — tak jak w CSS.</p></div>
-    <div class="card lg live"><span class="ico">🖌️</span><h3>Piksele w tiny-skia</h3><p>Prostokąty, bordery i tekst rasteryzowany fontdue wprost do bufora pikseli, bez GPU i bez shapingu.</p></div>
-    <div class="card lg live"><span class="ico">⚡</span><h3>Iteracja po hoście</h3><p>Na Linuksie renderer zapisuje wynik do PNG w&nbsp;sekundy — reboot QEMU tylko wtedy, gdy musisz.</p></div>
+    <div class="card lg live"><span class="ico">🌅</span><h3>Deklaratywne UI</h3><p>Opisujesz wygląd w HTML i CSS, system sam liczy układ, kolory i każdy piksel ekranu.</p></div>
+    <div class="card lg live"><span class="ico">📐</span><h3>Layout jak w CSS</h3><p>Flex, padding, margin, jednostki px i&nbsp;% — wszystko, co znasz ze stron, działa w&nbsp;aplikacjach.</p></div>
+    <div class="card lg live"><span class="ico">🪶</span><h3>Lekki rdzeń</h3><p>System chodzi bez ciężkich silników graficznych — szybki start, niskie wymagania.</p></div>
+    <div class="card lg live"><span class="ico">⚡</span><h3>Natychmiastowa pętla</h3><p>Zmieniasz markup i&nbsp;widzisz efekt na ekranie w&nbsp;sekundy — bez przebudowywania świata.</p></div>
   </section>
 
   <section class="pipe" id="road">
     <h2>Co dalej?</h2>
-    <p>Następny przystanek: zdarzenia — kliknięcia i&nbsp;klawiatura przechodzą z&nbsp;HTML-a do Rust backendu.
-       Potem obrazki, selektory klas i&nbsp;skalowanie fontów.</p>
-    <a class="pill" href="https://github.com/gabeczkag/prelixOS" target="_blank" rel="noopener">Śledź postęp na GitHubie</a>
+    <p>Następny przystanek: kliknięcia i&nbsp;klawiatura płyną z&nbsp;HTML-a prosto do systemu.
+       Potem obrazki, selektory klas i&nbsp;ładniejsze typografia.</p>
+    <a class="pill" href="https://github.com/gabeczkag/prelixOS" target="_blank" rel="noopener">Śledź postęp</a>
   </section>
 </main>
 
 <footer>
-  prelixOS · Rust + HTML · zbudowane z klawiatury i QEMU · <code class="inline">gabeczkag.github.io/prelixOS</code>
+  prelixOS · twój HTML staje się systemem · <code class="inline">gabeczkag.github.io/prelixOS</code>
 </footer>
 
 <script>
