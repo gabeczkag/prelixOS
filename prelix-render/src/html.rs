@@ -91,13 +91,15 @@ fn skip_to_tag_end(input: &str, start: usize) -> usize {
 
 /// Zamykający tag: zdejmuje stos aż do pasującego elementu włącznie (razem
 /// z nie zamkniętymi zagnieżdżeniami). Nieznany zamykający tag jest ignorowany.
+/// Korzeń (indeks 0) nigdy nie jest zdejmowany — zamykający `</html>` jest
+/// ignorowany, więc stos nigdy nie jest pusty i parser nie panikuje.
 fn parse_closing(input: &str, start: usize, doc: &Document, stack: &mut Vec<NodeId>) -> usize {
     let inner = start + 2;
     match input[inner..].find('>') {
         Some(end) => {
             let name = input[inner..inner + end].trim();
             if let Some(pos) = stack.iter().rposition(|id| tag_of(doc, *id) == Some(name)) {
-                stack.truncate(pos);
+                stack.truncate(pos.max(1));
             }
             inner + end + 1
         }
@@ -126,7 +128,6 @@ fn parse_opening(input: &str, start: usize, doc: &mut Document, stack: &mut Vec<
     let tag = input[name_start..j].to_string();
 
     let mut attrs: Vec<(String, String)> = Vec::new();
-    let mut self_closing = false;
     loop {
         while j < len && bytes[j].is_ascii_whitespace() {
             j += 1;
@@ -139,8 +140,10 @@ fn parse_opening(input: &str, start: usize, doc: &mut Document, stack: &mut Vec<
                 j += 1;
                 break;
             }
+            // `/` w pozycji atrybutu pomijamy: void i tak nigdy nie wchodzi na
+            // stos, a `/>` na nie-void elemencie go nie zamyka (HTML ignoruje
+            // self-closing poza składnią XML).
             b'/' => {
-                self_closing = true;
                 j += 1;
             }
             _ => {
@@ -193,7 +196,7 @@ fn parse_opening(input: &str, start: usize, doc: &mut Document, stack: &mut Vec<
 
     let parent = *stack.last().expect("stack never empty");
     let id = doc.push_element(&tag, attrs, Some(parent));
-    if !VOID_TAGS.contains(&tag.as_str()) && !self_closing {
+    if !VOID_TAGS.contains(&tag.as_str()) {
         stack.push(id);
     }
     j
@@ -297,5 +300,43 @@ mod tests {
         // Whitespace między tagami na poziomie korzenia też nie tworzy węzłów.
         let doc = parse_html("  <div>a</div>\n  <div>b</div>  ");
         assert_eq!(doc.children(doc.root()).len(), 2);
+    }
+
+    #[test]
+    fn closing_root_tag_does_not_panic() {
+        // `</html>` na wejściu: korzeń nie może być zdjęty ze stosu.
+        let doc = parse_html("</html>x");
+        let root = doc.root();
+        assert_eq!(doc.children(root).len(), 1);
+        assert_eq!(kind(&doc, doc.children(root)[0]), &text("x"));
+    }
+
+    #[test]
+    fn closing_root_tag_mid_document_keeps_siblings() {
+        let doc = parse_html("<div></html><span>y</span></div>");
+        let root = doc.root();
+        assert_eq!(doc.children(root).len(), 2);
+        let div = doc.children(root)[0];
+        assert_eq!(kind(&doc, div), &element("div"));
+        assert_eq!(doc.children(div).len(), 0);
+        let span = doc.children(root)[1];
+        assert_eq!(kind(&doc, span), &element("span"));
+        assert_eq!(doc.children(span).len(), 1);
+        assert_eq!(kind(&doc, doc.children(span)[0]), &text("y"));
+    }
+
+    #[test]
+    fn self_closing_slash_keeps_non_void_open() {
+        // `/>` na nie-void elemencie nie zamyka go: span zostaje dzieckiem div.
+        let doc = parse_html("<div/><span>x</span>");
+        let root = doc.root();
+        assert_eq!(doc.children(root).len(), 1);
+        let div = doc.children(root)[0];
+        assert_eq!(kind(&doc, div), &element("div"));
+        assert_eq!(doc.children(div).len(), 1);
+        let span = doc.children(div)[0];
+        assert_eq!(kind(&doc, span), &element("span"));
+        assert_eq!(doc.children(span).len(), 1);
+        assert_eq!(kind(&doc, doc.children(span)[0]), &text("x"));
     }
 }

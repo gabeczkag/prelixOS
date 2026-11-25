@@ -30,11 +30,15 @@ pub struct Document {
 }
 
 impl Document {
-    pub fn new() -> Self {
+    /// Konstruktor parsera (nie jest publicznym API): dokument bez korzenia
+    /// ma puste `nodes`; `root()`/`children()` mają znaczenie dopiero po
+    /// utworzeniu korzenia przez `parse_html`.
+    pub(crate) fn new() -> Self {
         Document { nodes: Vec::new() }
     }
 
-    /// Korzeń dokumentu: pierwszy węzeł (tag `html`), tworzony zawsze pierwszy.
+    /// Korzeń dokumentu: pierwszy węzeł (tag `html`), tworzony zawsze pierwszy
+    /// przez `parse_html`.
     pub fn root(&self) -> NodeId {
         0
     }
