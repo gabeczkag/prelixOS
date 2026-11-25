@@ -37,61 +37,38 @@
   }
   ::selection { background: var(--c-sun); color: var(--c-black); }
 
-  /* ── 4-bit sunrise: twarde pasy, zero przejść ── */
-  .sky { position: fixed; inset: 0; z-index: -3;
-    background: linear-gradient(180deg,
-      var(--c-night) 0%, var(--c-night) 20%,
-      var(--c-indigo) 20%, var(--c-indigo) 38%,
-      var(--c-blue) 38%, var(--c-blue) 52%,
-      var(--c-violet) 52%, var(--c-violet) 64%,
-      var(--c-lav) 64%, var(--c-lav) 74%,
-      var(--c-pink) 74%, var(--c-pink) 82%,
-      var(--c-gold) 82%, var(--c-gold) 90%,
-      var(--c-sun) 90%, var(--c-sun) 100%);
+  /* ── Pixel-stepped corners: rounded, ale schodkowo (2 stopnie × 8px) ── */
+  .steps {
+    clip-path: polygon(
+      0 16px, 8px 16px, 8px 8px, 16px 8px, 16px 0,
+      calc(100% - 16px) 0, calc(100% - 16px) 8px, calc(100% - 8px) 8px, calc(100% - 8px) 16px, 100% 16px,
+      100% calc(100% - 16px), calc(100% - 8px) calc(100% - 16px), calc(100% - 8px) calc(100% - 8px), calc(100% - 16px) calc(100% - 8px), calc(100% - 16px) 100%,
+      16px 100%, 16px calc(100% - 8px), 8px calc(100% - 8px), 8px calc(100% - 16px), 0 calc(100% - 16px)
+    );
   }
-  /* słońce: schodkowy pixel-round blok, wstępuje skokami */
-  .sun { position: fixed; left: 50%; bottom: -16vmin; width: 52vmin; height: 52vmin;
-         transform: translateX(-50%); z-index: -2;
-         background: var(--c-sun);
-         border: 5px solid var(--c-black);
-         border-radius: 34%;
-         box-shadow:
-           inset 0 0 0 10px var(--c-cream),
-           inset 0 0 0 14px var(--c-black),
-           -14px 14px 0 rgba(0,0,0,.35);
-         animation: rise 32s steps(8) infinite alternate; }
-  .sun::after { content: ""; position: absolute; inset: 22%;
-                background: var(--c-gold); border: 5px solid var(--c-black); border-radius: 34%; }
-  @keyframes rise { to { transform: translateX(-50%) translateY(-14vmin); } }
-  .scanline { position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: .12;
-    background: repeating-linear-gradient(0deg, transparent 0 3px, var(--c-black) 3px 5px); }
 
-  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 clamp(18px, 3vw, 40px); }
-
-  /* ── Block material: rounded, chunky border, hard shadow, flat 4-bit fill ── */
+  /* ── Block material: schodkowe rogi, gruba ramka, twardy cień przez drop-shadow ── */
   .blk {
     position: relative;
     background: var(--c-indigo);
     border: 4px solid var(--c-black);
-    border-radius: 20px;
-    box-shadow: 10px 10px 0 var(--c-black);
-    transition: transform .15s steps(3), box-shadow .15s steps(3);
+    filter: drop-shadow(12px 12px 0 var(--c-black));
   }
-  .blk:hover { transform: translate(-3px, -3px); box-shadow: 13px 13px 0 var(--c-black); }
-  .blk.sunlit { background: var(--c-violet); box-shadow: 10px 10px 0 var(--c-sun); }
-  .blk.sunlit:hover { box-shadow: 13px 13px 0 var(--c-sun); }
-  .blk.deep { background: rgba(20, 18, 51, 0.82); }
+  .blk:hover { transform: translate(-3px, -3px); }
+  .blk { transition: transform .15s steps(3); }
+  .blk.sunlit { background: var(--c-violet); filter: drop-shadow(12px 12px 0 var(--c-sun)); }
+  .blk.deep { background: rgba(20, 18, 51, 0.85); }
 
   .tag { display: inline-block; font: 800 12px/1 "SF Mono", ui-monospace, monospace;
          letter-spacing: .14em; text-transform: uppercase;
          padding: 8px 14px; border: 4px solid var(--c-black); background: var(--c-sun);
-         color: var(--c-black); border-radius: 10px; box-shadow: 4px 4px 0 var(--c-black); }
+         color: var(--c-black); }
+  .tag.steps { box-shadow: none; }
 
   /* ── Nav ── */
   .topbar { position: sticky; top: 0; z-index: 20;
     background: var(--c-night);
-    border-bottom: 4px solid var(--c-black);
-    box-shadow: 0 6px 0 rgba(0,0,0,.4); }
+    border-bottom: 4px solid var(--c-black); }
   .topbar .in { max-width: 1180px; margin: 0 auto; padding: 16px clamp(18px, 3vw, 40px);
     display: flex; align-items: center; gap: 24px; }
   .logo { font-weight: 900; font-size: 21px; letter-spacing: -0.02em; text-decoration: none; color: var(--c-white); }
@@ -101,16 +78,15 @@
   .topbar a:hover { color: var(--c-sun); }
   .btn { display: inline-block; padding: 13px 24px; font-size: 14px; font-weight: 900;
          text-decoration: none; color: var(--c-black); background: var(--c-sun);
-         border: 4px solid var(--c-black); border-radius: 14px;
-         box-shadow: 6px 6px 0 var(--c-black);
-         transition: transform .12s steps(2), box-shadow .12s steps(2); }
-  .btn:hover { transform: translate(-3px, -3px); box-shadow: 9px 9px 0 var(--c-black); }
-  .btn:active { transform: translate(4px, 4px); box-shadow: 2px 2px 0 var(--c-black); }
-  .btn.ghost { background: var(--c-violet); color: var(--c-white); box-shadow: 6px 6px 0 var(--c-black); }
+         border: 4px solid var(--c-black);
+         transition: transform .12s steps(2); }
+  .btn:hover { transform: translate(-3px, -3px); }
+  .btn:active { transform: translate(4px, 4px); }
+  .btn.ghost { background: var(--c-violet); color: var(--c-white); }
 
   /* ── Bento layout ── */
-  .bento { display: grid; grid-template-columns: repeat(12, 1fr); gap: 24px;
-           padding: 52px 0 20px; }
+  .bento { display: grid; grid-template-columns: repeat(12, 1fr); gap: 28px;
+           padding: 52px 0 28px; }
   .col-8 { grid-column: span 8; } .col-4 { grid-column: span 4; }
   .col-12 { grid-column: span 12; }
 
@@ -120,7 +96,7 @@
   .hero p { font-size: clamp(16px, 1.8vw, 19px); color: var(--c-lav); max-width: 52ch; }
   .hero .cta { display: flex; gap: 18px; margin-top: 32px; flex-wrap: wrap; }
 
-  .side { display: flex; flex-direction: column; gap: 24px; }
+  .side { display: flex; flex-direction: column; gap: 30px; }
   .sunblock { padding: 28px; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 12px;
               background: var(--c-gold); color: var(--c-black); }
   .sunblock .big { font-size: 34px; font-weight: 900; letter-spacing: -0.03em; line-height: 1.05; }
@@ -134,11 +110,11 @@
   .demo pre { overflow-x: auto; font: 14px/1.75 "SF Mono", "JetBrains Mono", ui-monospace, monospace; margin-top: 16px; }
   .demo .tag2 { color: var(--c-sun); } .demo .attr2 { color: var(--c-lav); } .demo .sel2 { color: var(--c-blue); } .demo .val2 { color: var(--c-pink); } .demo .com { color: var(--c-gray); }
 
-  .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; padding: 24px 0; }
+  .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; padding: 28px 0; }
   .card { padding: 30px 28px; }
   .card .ico { font-size: 32px; display: block; margin-bottom: 18px; }
   .card h3 { font-size: 18px; font-weight: 900; margin-bottom: 10px; letter-spacing: -0.01em; }
-  .card h3::after { content: ""; display: block; width: 46px; height: 6px; background: var(--c-sun); border: 3px solid var(--c-black); border-radius: 6px; margin-top: 10px; }
+  .card h3::after { content: ""; display: block; width: 46px; height: 10px; background: var(--c-sun); border: 3px solid var(--c-black); margin-top: 10px; }
   .card p { font-size: 14.5px; color: var(--c-lav); }
   .card:nth-child(2) h3::after { background: var(--c-pink); }
   .card:nth-child(3) h3::after { background: var(--c-teal); }
@@ -161,9 +137,35 @@
 </head>
 <body>
 
-<div class="sky" aria-hidden="true"></div>
-<div class="sun" aria-hidden="true"></div>
-<div class="scanline" aria-hidden="true"></div>
+<!-- ── Sky: gradient pasami, co 20px nowy kolor, zero przejść ── -->
+<div style="position: fixed; inset: 0; z-index: -3;
+  background: repeating-linear-gradient(180deg,
+    var(--c-night)   0px   20px,
+    var(--c-indigo)  20px  40px,
+    var(--c-blue)    40px  60px,
+    var(--c-violet)  60px  80px,
+    var(--c-lav)     80px  100px,
+    var(--c-pink)    100px 120px,
+    var(--c-gold)    120px 140px,
+    var(--c-sun)     140px 160px);" aria-hidden="true"></div>
+
+<!-- słońce: schodkowy 8-bit blok, wstępuje skokami -->
+<div class="sun" style="position: fixed; left: 50%; bottom: -18vmin; width: 52vmin; height: 52vmin;
+  transform: translateX(-50%); z-index: -2;
+  background: var(--c-sun); border: 5px solid var(--c-black);
+  clip-path: polygon(
+    0 26%, 6% 26%, 6% 12%, 12% 12%, 12% 6%, 26% 6%, 26% 0,
+    calc(100% - 26%) 0, calc(100% - 26%) 6%, calc(100% - 12%) 6%, calc(100% - 12%) 12%, calc(100% - 6%) 12%, calc(100% - 6%) 26%, 100% 26%,
+    100% calc(100% - 26%), calc(100% - 6%) calc(100% - 26%), calc(100% - 6%) calc(100% - 12%), calc(100% - 12%) calc(100% - 12%), calc(100% - 12%) calc(100% - 6%), calc(100% - 26%) calc(100% - 6%), calc(100% - 26%) 100%,
+    26% 100%, 26% calc(100% - 6%), 12% calc(100% - 6%), 12% calc(100% - 12%), 6% calc(100% - 12%), 6% calc(100% - 26%), 0 calc(100% - 26%)
+  );
+  animation: rise 32s steps(8) infinite alternate;" aria-hidden="true">
+  <div style="position:absolute; inset: 24%; background: var(--c-gold); border: 5px solid var(--c-black);"></div>
+  <div style="position:absolute; inset: 40%; background: var(--c-cream); border: 5px solid var(--c-black);"></div>
+</div>
+<style>@keyframes rise { to { transform: translateX(-50%) translateY(-14vmin); } }</style>
+<div class="scanline" style="position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: .12;
+  background: repeating-linear-gradient(0deg, transparent 0 3px, var(--c-black) 3px 5px);" aria-hidden="true"></div>
 
 <header class="topbar">
   <div class="in">
@@ -173,36 +175,36 @@
       <a href="#features">Co potrafi</a>
       <a href="#road">Dalej</a>
     </div>
-    <a class="btn" href="https://github.com/gabeczkag/prelixOS" target="_blank" rel="noopener">GitHub</a>
+    <a class="btn steps" href="https://github.com/gabeczkag/prelixOS" target="_blank" rel="noopener">GitHub</a>
   </div>
 </header>
 
 <main class="wrap">
   <section class="bento">
-    <div class="hero blk deep col-8">
-      <span class="tag">prelixOS</span>
+    <div class="hero blk deep steps col-8">
+      <span class="tag steps">prelixOS</span>
       <h1>UI piszesz w HTML.<br><span class="sunword">To system operacyjny.</span></h1>
       <p>Opisujesz interfejs zwykłymi tagami — prelixOS wyrenderuje go prosto na ekranie.
          Tagi, kolory, układ: dokładnie tak, jak to napiszesz. Twój markup staje się pulpitem.</p>
       <div class="cta">
-        <a class="btn" href="https://github.com/gabeczkag/prelixOS" target="_blank" rel="noopener">Zobacz kod</a>
-        <a class="btn ghost" href="#demo">Jak to wygląda ↓</a>
+        <a class="btn steps" href="https://github.com/gabeczkag/prelixOS" target="_blank" rel="noopener">Zobacz kod</a>
+        <a class="btn ghost steps" href="#demo">Jak to wygląda ↓</a>
       </div>
     </div>
 
     <div class="side col-4">
-      <div class="sunblock blk">
+      <div class="sunblock blk steps">
         <span class="big">HTML →<br>ekran.</span>
         <p>Nie ma po drodze silnika przeglądarki ani frameworka. Markup wchodzi, piksele wychodzą.</p>
       </div>
-      <div class="miniblk blk">
+      <div class="miniblk blk steps">
         <span class="k">Renderer</span>
         <span class="v">Własny silnik HTML/CSS zbudowany od zera w Ruście.</span>
       </div>
     </div>
 
-    <div class="demo blk deep col-8" id="demo">
-      <span class="tag">przykład</span>
+    <div class="demo blk deep steps col-8" id="demo">
+      <span class="tag steps">przykład</span>
 <pre><span class="tag2">&lt;div</span> <span class="attr2">class</span>=<span class="val2">"okno"</span><span class="tag2">&gt;</span>
   <span class="tag2">&lt;span&gt;</span>prelixOS<span class="tag2">&lt;/span&gt;</span>
 <span class="tag2">&lt;/div&gt;</span>
@@ -213,24 +215,24 @@
 <span class="com">→ i to już jest okno aplikacji na pulpicie systemu</span></pre>
     </div>
 
-    <div class="miniblk blk mint col-4">
+    <div class="miniblk blk steps mint col-4">
       <span class="k">Szybka pętla</span>
       <span class="v">Zmieniasz markup — efekt na ekranie w sekundy, nie w minuty.</span>
     </div>
   </section>
 
   <section class="features" id="features">
-    <div class="card blk deep">
+    <div class="card blk deep steps">
       <span class="ico">🧱</span>
       <h3>Deklaratywne UI</h3>
       <p>Opisujesz wygląd w HTML i CSS, system sam liczy układ, kolory i każdy piksel ekranu.</p>
     </div>
-    <div class="card blk deep">
+    <div class="card blk deep steps">
       <span class="ico">🪶</span>
       <h3>Lekki rdzeń</h3>
       <p>System chodzi bez ciężkich silników graficznych — szybki start, niskie wymagania.</p>
     </div>
-    <div class="card blk deep">
+    <div class="card blk deep steps">
       <span class="ico">🌅</span>
       <h3>Wschód słońca</h3>
       <p>Interfejs systemu rodzi się od nowa co render — jak poranek, tylko szybciej.</p>
@@ -238,14 +240,14 @@
   </section>
 
   <section class="bento" id="road">
-    <div class="road blk deep">
+    <div class="road blk deep steps">
       <h2>Co dalej?</h2>
       <p>Następny przystanek: kliknięcia i&nbsp;klawiatura płyną z&nbsp;HTML-a prosto do systemu.
          Potem obrazki, selektory klas i&nbsp;ładniejsza typografia.</p>
     </div>
-    <div class="cta-block blk sunlit">
+    <div class="cta-block blk sunlit steps">
       <span class="k" style="font: 900 13px/1 'SF Mono', ui-monospace, monospace; letter-spacing:.16em; text-transform:uppercase; color:#ffd23c;">gotowy?</span>
-      <a class="btn" href="https://github.com/gabeczkag/prelixOS" target="_blank" rel="noopener">Śledź postęp</a>
+      <a class="btn steps" href="https://github.com/gabeczkag/prelixOS" target="_blank" rel="noopener">Śledź postęp</a>
     </div>
   </section>
 </main>
