@@ -115,8 +115,9 @@ pub fn compute_layout(
         return result;
     }
 
-    // Pre-order po arenie: jawny stos, maska odwiedzin chroni przed cyklami
-    // i węzłami współdzielonymi między rodzicami.
+    // Pre-order po arenie: jawny stos, maska odwiedzin, by każdy węzeł
+    // przetworzyć raz (cykle i współdzielone dzieci odcina dopiero
+    // `has_parent` przy dowiązywaniu dzieci w grafie taffy).
     let mut visited: Vec<bool> = alloc::vec![false; doc.nodes.len()];
     let mut order: Vec<NodeId> = Vec::new();
     let mut stack: Vec<NodeId> = Vec::new();
@@ -139,6 +140,11 @@ pub fn compute_layout(
     let mut dom_of_taffy: Vec<(TaffyId, NodeId)> = Vec::new();
     let mut text_of_taffy: Vec<(TaffyId, NodeId)> = Vec::new();
     let mut dom_to_taffy: Vec<Option<TaffyId>> = alloc::vec![None; doc.nodes.len()];
+    let mut has_parent: Vec<bool> = alloc::vec![false; doc.nodes.len()];
+    // Korzeń nie może zostać czyimś dzieckiem — to zrywa cykle w arenie
+    // (A → B → A), zanim trafią do grafu taffy, w którym add_child nie
+    // sprawdza rodzica, a layout rekurencyjnie z niej korzysta.
+    has_parent[root] = true;
     let mut taffy_root = None;
     for &id in &order {
         let mut style = match styles.get(id) {
@@ -172,12 +178,15 @@ pub fn compute_layout(
 
     for &(taffy_id, dom_id) in &dom_of_taffy {
         for &child in &doc.nodes[dom_id].children {
-            if child >= dom_to_taffy.len() {
+            if child >= dom_to_taffy.len() || has_parent[child] {
                 continue;
             }
             if let Some(child_id) = dom_to_taffy[child] {
-                if tree.add_child(taffy_id, child_id).is_err() {
-                    continue;
+                if tree.add_child(taffy_id, child_id).is_ok() {
+                    // Co najwyżej jeden rodzic w grafie taffy: pierwszy
+                    // rodzic w pre-orderze wygrywa, kolejne dowiązania są
+                    // pomijane (diament / współdzielone dziecko / cykl).
+                    has_parent[child] = true;
                 }
             }
         }
@@ -312,5 +321,54 @@ mod tests {
         let font = test_font();
         let out = compute_layout(&doc, &styles, 999, (200.0, 200.0), &font);
         assert!(out.is_empty());
+    }
+
+    /// Arena z cyklem (A → B → A) — parser tego nie wytworzy, ale arenę można
+    /// zbudować ręcznie. Layout nie może abortować (przepełnienie stosu w taffy
+    /// to abort, nie błąd) i musi zwrócić deterministyczny wynik.
+    #[test]
+    fn cyclic_arena_does_not_crash() {
+        use alloc::string::String;
+        use crate::dom::{ElementData, Node};
+
+        let mut doc = Document { nodes: Vec::new() };
+        doc.nodes.push(Node {
+            parent: None,
+            children: alloc::vec![1],
+            kind: NodeKind::Element(ElementData { tag: String::from("div"), attrs: Vec::new() }),
+        });
+        doc.nodes.push(Node {
+            parent: Some(0),
+            children: alloc::vec![0],
+            kind: NodeKind::Element(ElementData { tag: String::from("span"), attrs: Vec::new() }),
+        });
+
+        let font = test_font();
+        let out = compute_layout(&doc, &[], 0, (200.0, 200.0), &font);
+        assert_eq!(out.len(), 2);
+        assert_eq!(out[0].node, 0);
+        assert_eq!(out[0].w, 200.0); // korzeń przyjmuje viewport
+        assert_eq!(out[0].h, 200.0);
+        assert_eq!(out[1].node, 1);
+    }
+
+    /// Węzeł będący własnym dzieckiem — ten sam klasa zagrożenia co cykl.
+    #[test]
+    fn self_loop_arena_does_not_crash() {
+        use alloc::string::String;
+        use crate::dom::{ElementData, Node};
+
+        let mut doc = Document { nodes: Vec::new() };
+        doc.nodes.push(Node {
+            parent: None,
+            children: alloc::vec![0],
+            kind: NodeKind::Element(ElementData { tag: String::from("div"), attrs: Vec::new() }),
+        });
+
+        let font = test_font();
+        let out = compute_layout(&doc, &[], 0, (200.0, 200.0), &font);
+        assert_eq!(out.len(), 1);
+        assert_eq!(out[0].node, 0);
+        assert_eq!(out[0].w, 200.0);
     }
 }
