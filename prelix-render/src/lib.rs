@@ -11,7 +11,9 @@ pub use dom::{Document, ElementData, Node, NodeId, NodeKind};
 pub use html::parse_html;
 
 mod layout;
+mod paint;
 mod style;
 
 pub use layout::{LaidOutNode, assets_font_bytes, compute_layout};
+pub use paint::paint;
 pub use style::{Border, Style, default_style, style_tree};
