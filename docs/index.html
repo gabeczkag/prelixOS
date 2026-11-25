@@ -3,102 +3,66 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>prelixOS — system, który wschodzi razem ze słońcem</title>
-<meta name="description" content="prelixOS: szybki, lekki system operacyjny. Uruchamia się w sekundy, działa płynnie na każdym sprzęcie i wygląda pięknie od pierwszej chwili.">
+<title>prelixOS — szybki, lekki system, który wschodzi ze słońcem</title>
+<meta name="description" content="prelixOS: szybki, lekki i kolorowy system operacyjny. Uruchamia się w sekundy, działa płynnie na każdym sprzęcie. Pobierz i zobacz różnicę.">
 <style>
-  /* ── 4-BIT PALETTE (16 kolorów, nic poza tym) ──
+  /* ── 4-BIT PALETTE (16 kolorów) ──
      #000000 #141233 #2c2a8c #4f7dff #7c5cff #b87fd1 #e88ad2 #ffffff
      #fff3b0 #ffd23c #f5a623 #e07a1f #d43c3c #3cad9e #8d84b8 #7a3b12 */
   :root {
-    --c-black: #000000;
-    --c-night: #141233;
-    --c-indigo: #2c2a8c;
-    --c-blue: #4f7dff;
-    --c-violet: #7c5cff;
-    --c-lav: #b87fd1;
-    --c-pink: #e88ad2;
-    --c-white: #ffffff;
-    --c-cream: #fff3b0;
-    --c-sun: #ffd23c;
-    --c-gold: #f5a623;
-    --c-orange: #e07a1f;
-    --c-red: #d43c3c;
-    --c-teal: #3cad9e;
-    --c-gray: #8d84b8;
-    --c-brown: #7a3b12;
+    --c-black: #000000; --c-night: #141233; --c-indigo: #2c2a8c; --c-blue: #4f7dff;
+    --c-violet: #7c5cff; --c-lav: #b87fd1; --c-pink: #e88ad2; --c-white: #ffffff;
+    --c-cream: #fff3b0; --c-sun: #ffd23c; --c-gold: #f5a623; --c-orange: #e07a1f;
+    --c-red: #d43c3c; --c-teal: #3cad9e; --c-gray: #8d84b8; --c-brown: #7a3b12;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
     font: 16px/1.6 "Inter", "SF Pro Display", system-ui, -apple-system, "Segoe UI", sans-serif;
-    background: var(--c-night);
-    color: var(--c-white);
-    min-height: 100vh;
-    overflow-x: hidden;
+    background: var(--c-night); color: var(--c-white);
+    min-height: 100vh; overflow-x: hidden;
   }
   ::selection { background: var(--c-sun); color: var(--c-black); }
 
-  /* ── 4-bit sunrise: pasy co 20px, zero przejść ── */
   .sky { position: fixed; inset: 0; z-index: -3;
     background: repeating-linear-gradient(180deg,
-      var(--c-night)   0px   20px,
-      var(--c-indigo)  20px  40px,
-      var(--c-blue)    40px  60px,
-      var(--c-violet)  60px  80px,
-      var(--c-lav)     80px  100px,
-      var(--c-pink)    100px 120px,
-      var(--c-gold)    120px 140px,
-      var(--c-sun)     140px 160px);
-  }
-  /* słońce: schodkowy 8-bit blok, wstępuje skokami */
+      var(--c-night) 0px 20px, var(--c-indigo) 20px 40px, var(--c-blue) 40px 60px,
+      var(--c-violet) 60px 80px, var(--c-lav) 80px 100px, var(--c-pink) 100px 120px,
+      var(--c-gold) 120px 140px, var(--c-sun) 140px 160px); }
   .sun { position: fixed; left: 50%; bottom: -18vmin; width: 52vmin; height: 52vmin;
     transform: translateX(-50%); z-index: -2;
     background: var(--c-sun); border: 5px solid var(--c-black);
-    clip-path: polygon(
-      0 26%, 6% 26%, 6% 12%, 12% 12%, 12% 6%, 26% 6%, 26% 0,
-      calc(100% - 26%) 0, calc(100% - 26%) 6%, calc(100% - 12%) 6%, calc(100% - 12%) 12%, calc(100% - 6%) 12%, calc(100% - 6%) 26%, 100% 26%,
-      100% calc(100% - 26%), calc(100% - 6%) calc(100% - 26%), calc(100% - 6%) calc(100% - 12%), calc(100% - 12%) calc(100% - 12%), calc(100% - 12%) calc(100% - 6%), calc(100% - 26%) calc(100% - 6%), calc(100% - 26%) 100%,
-      26% 100%, 26% calc(100% - 6%), 12% calc(100% - 6%), 12% calc(100% - 12%), 6% calc(100% - 12%), 6% calc(100% - 26%), 0 calc(100% - 26%)
-    );
+    clip-path: polygon(0 26%, 6% 26%, 6% 12%, 12% 12%, 12% 6%, 26% 6%, 26% 0,
+      calc(100% - 26%) 0, calc(100% - 26%) 6%, calc(100% - 12%) 6%, calc(100% - 12%) 12%,
+      calc(100% - 6%) 12%, calc(100% - 6%) 26%, 100% 26%,
+      100% calc(100% - 26%), calc(100% - 6%) calc(100% - 26%), calc(100% - 6%) calc(100% - 12%),
+      calc(100% - 12%) calc(100% - 12%), calc(100% - 12%) calc(100% - 6%), calc(100% - 26%) calc(100% - 6%),
+      calc(100% - 26%) 100%, 26% 100%, 26% calc(100% - 6%), 12% calc(100% - 6%), 12% calc(100% - 12%),
+      6% calc(100% - 12%), 6% calc(100% - 26%), 0 calc(100% - 26%));
     animation: rise 32s steps(8) infinite alternate; }
-  .sun::after { content: ""; position: absolute; inset: 24%;
-    background: var(--c-gold); border: 5px solid var(--c-black); }
-  .sun::before { content: ""; position: absolute; inset: 42%;
-    background: var(--c-cream); border: 5px solid var(--c-black); z-index: 1; }
+  .sun::after { content: ""; position: absolute; inset: 24%; background: var(--c-gold); border: 5px solid var(--c-black); }
+  .sun::before { content: ""; position: absolute; inset: 40%; background: var(--c-cream); border: 5px solid var(--c-black); z-index: 1; }
   @keyframes rise { to { transform: translateX(-50%) translateY(-14vmin); } }
   .scanline { position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: .12;
     background: repeating-linear-gradient(0deg, transparent 0 3px, var(--c-black) 3px 5px); }
 
   .wrap { max-width: 1180px; margin: 0 auto; padding: 0 clamp(18px, 3vw, 40px); }
 
-  /* ── Block material: schodkowe rogi, gruba ramka, twardy cień ── */
-  .steps {
-    clip-path: polygon(
-      0 16px, 8px 16px, 8px 8px, 16px 8px, 16px 0,
+  .steps { clip-path: polygon(0 16px, 8px 16px, 8px 8px, 16px 8px, 16px 0,
       calc(100% - 16px) 0, calc(100% - 16px) 8px, calc(100% - 8px) 8px, calc(100% - 8px) 16px, 100% 16px,
-      100% calc(100% - 16px), calc(100% - 8px) calc(100% - 16px), calc(100% - 8px) calc(100% - 8px), calc(100% - 16px) calc(100% - 8px), calc(100% - 16px) 100%,
-      16px 100%, 16px calc(100% - 8px), 8px calc(100% - 8px), 8px calc(100% - 16px), 0 calc(100% - 16px)
-    );
-  }
-  .blk {
-    position: relative;
-    background: var(--c-indigo);
-    border: 4px solid var(--c-black);
-    filter: drop-shadow(12px 12px 0 var(--c-black));
-    transition: transform .15s steps(3);
-  }
+      100% calc(100% - 16px), calc(100% - 8px) calc(100% - 16px), calc(100% - 8px) calc(100% - 8px),
+      calc(100% - 16px) calc(100% - 8px), calc(100% - 16px) 100%,
+      16px 100%, 16px calc(100% - 8px), 8px calc(100% - 8px), 8px calc(100% - 16px), 0 calc(100% - 16px)); }
+  .blk { position: relative; background: var(--c-indigo); border: 4px solid var(--c-black);
+    filter: drop-shadow(12px 12px 0 var(--c-black)); transition: transform .15s steps(3); }
   .blk:hover { transform: translate(-3px, -3px); }
   .blk.sunlit { background: var(--c-violet); filter: drop-shadow(12px 12px 0 var(--c-sun)); }
   .blk.deep { background: rgba(20, 18, 51, 0.85); }
 
   .tag { display: inline-block; font: 800 12px/1 "SF Mono", ui-monospace, monospace;
-         letter-spacing: .14em; text-transform: uppercase;
-         padding: 8px 14px; border: 4px solid var(--c-black); background: var(--c-sun);
-         color: var(--c-black); }
+    letter-spacing: .14em; text-transform: uppercase; padding: 8px 14px;
+    border: 4px solid var(--c-black); background: var(--c-sun); color: var(--c-black); }
 
-  /* ── Nav ── */
-  .topbar { position: sticky; top: 0; z-index: 20;
-    background: var(--c-night);
-    border-bottom: 4px solid var(--c-black); }
+  .topbar { position: sticky; top: 0; z-index: 20; background: var(--c-night); border-bottom: 4px solid var(--c-black); }
   .topbar .in { max-width: 1180px; margin: 0 auto; padding: 16px clamp(18px, 3vw, 40px);
     display: flex; align-items: center; gap: 24px; }
   .logo { font-weight: 900; font-size: 21px; letter-spacing: -0.02em; text-decoration: none; color: var(--c-white); }
@@ -106,57 +70,93 @@
   .topbar .links { display: flex; gap: 20px; margin-left: auto; }
   .topbar a { color: var(--c-lav); text-decoration: none; font-size: 14px; font-weight: 700; }
   .topbar a:hover { color: var(--c-sun); }
-  .btn { display: inline-block; padding: 13px 24px; font-size: 14px; font-weight: 900;
-         text-decoration: none; color: var(--c-black); background: var(--c-sun);
-         border: 4px solid var(--c-black);
-         transition: transform .12s steps(2); }
+  .btn { display: inline-block; padding: 13px 26px; font-size: 14.5px; font-weight: 900;
+    text-decoration: none; color: var(--c-black); background: var(--c-sun);
+    border: 4px solid var(--c-black); transition: transform .12s steps(2); }
   .btn:hover { transform: translate(-3px, -3px); }
   .btn:active { transform: translate(4px, 4px); }
   .btn.ghost { background: var(--c-violet); color: var(--c-white); }
+  .btn.sunlit { background: var(--c-cream); }
 
-  /* ── Bento layout ── */
-  .bento { display: grid; grid-template-columns: repeat(12, 1fr); gap: 28px;
-           padding: 60px 0 28px; }
-  .col-8 { grid-column: span 8; } .col-4 { grid-column: span 4; }
+  .bento { display: grid; grid-template-columns: repeat(12, 1fr); gap: 28px; padding: 56px 0 28px; }
+  .col-8 { grid-column: span 8; } .col-4 { grid-column: span 4; } .col-12 { grid-column: span 12; }
 
-  .hero { padding: clamp(36px, 5vw, 66px); display: flex; flex-direction: column; justify-content: center; align-items: flex-start; }
-  h1 { font-size: clamp(42px, 5.6vw, 78px); line-height: 1.0; letter-spacing: -0.035em; font-weight: 900; margin: 22px 0 18px; }
+  /* ── Hero ── */
+  .hero { padding: clamp(36px, 5vw, 64px); text-align: left; }
+  h1 { font-size: clamp(40px, 5.6vw, 76px); line-height: 1.0; letter-spacing: -0.035em; font-weight: 900; margin: 22px 0 18px; }
   h1 .sunword { color: var(--c-sun); }
-  .hero p { font-size: clamp(16px, 1.8vw, 19px); color: var(--c-lav); max-width: 50ch; }
-  .hero .cta { display: flex; gap: 18px; margin-top: 34px; flex-wrap: wrap; }
+  .hero p.sub { font-size: clamp(16px, 1.8vw, 19px); color: var(--c-lav); max-width: 54ch; }
+  .hero .cta { display: flex; gap: 18px; margin-top: 30px; flex-wrap: wrap; align-items: center; }
+  .hero .ver { color: var(--c-gray); font-size: 13.5px; }
 
-  .side { display: flex; flex-direction: column; gap: 30px; }
-  .sunblock { padding: 30px; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 12px;
-              background: var(--c-gold); color: var(--c-black); }
-  .sunblock .big { font-size: 36px; font-weight: 900; letter-spacing: -0.03em; line-height: 1.05; }
-  .sunblock p { font-size: 14.5px; font-weight: 700; }
-  .miniblk { padding: 24px 28px; }
-  .miniblk .k { font: 900 13px/1 "SF Mono", ui-monospace, monospace; letter-spacing: .16em; text-transform: uppercase; color: var(--c-sun); }
-  .miniblk .v { font-size: 15.5px; color: var(--c-white); margin-top: 10px; }
-  .miniblk.mint .k { color: var(--c-teal); }
-  .miniblk.rose .k { color: var(--c-pink); }
+  /* ── Desktop mockup ── */
+  .desk { margin-top: 40px; overflow: hidden; }
+  .screen { background:
+      repeating-linear-gradient(180deg,
+        var(--c-indigo) 0 24px, var(--c-blue) 24px 48px, var(--c-violet) 48px 72px,
+        var(--c-lav) 72px 96px, var(--c-pink) 96px 120px, var(--c-gold) 120px 144px, var(--c-sun) 144px 168px);
+    min-height: 380px; position: relative; padding: 28px; }
+  .win { position: absolute; left: 32px; top: 30px; width: min(440px, 74%);
+    background: var(--c-night); border: 4px solid var(--c-black);
+    filter: drop-shadow(10px 10px 0 rgba(0,0,0,.45)); }
+  .win .bar { background: var(--c-violet); border-bottom: 4px solid var(--c-black);
+    display: flex; gap: 8px; align-items: center; padding: 8px 12px; }
+  .win .bar s { width: 12px; height: 12px; background: var(--c-sun); border: 2px solid var(--c-black); }
+  .win .bar span { font: 800 12px "SF Mono", ui-monospace, monospace; letter-spacing: .1em; color: var(--c-white); margin-left: auto; }
+  .win .body { padding: 26px 22px; }
+  .win .body .hi { font-size: 24px; font-weight: 900; color: var(--c-sun); letter-spacing: -0.02em; }
+  .win .body p { color: var(--c-lav); font-size: 14px; margin-top: 8px; }
+  .deskbar { position: absolute; left: 0; right: 0; bottom: 0; height: 54px;
+    background: var(--c-night); border-top: 4px solid var(--c-black);
+    display: flex; align-items: center; gap: 14px; padding: 0 16px; }
+  .deskbar .start { background: var(--c-sun); color: var(--c-black); font-weight: 900; font-size: 13px;
+    padding: 8px 14px; border: 3px solid var(--c-black); }
+  .deskbar .app { width: 34px; height: 34px; border: 3px solid var(--c-black); border-radius: 4px;
+    display: grid; place-items: center; font-size: 17px; background: var(--c-indigo); }
+  .deskbar .app:nth-child(3) { background: var(--c-violet); }
+  .deskbar .app:nth-child(4) { background: var(--c-blue); }
+  .deskbar .app:nth-child(5) { background: var(--c-gold); }
+  .deskbar .clock { margin-left: auto; font: 900 14px "SF Mono", ui-monospace, monospace;
+    color: var(--c-white); background: var(--c-black); padding: 8px 12px; }
 
-  .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; padding: 28px 0; }
-  .card { padding: 32px 28px; }
-  .card .ico { font-size: 34px; display: block; margin-bottom: 18px; }
-  .card h3 { font-size: 19px; font-weight: 900; margin-bottom: 10px; letter-spacing: -0.01em; }
-  .card h3::after { content: ""; display: block; width: 46px; height: 10px; background: var(--c-sun); border: 3px solid var(--c-black); margin-top: 10px; }
-  .card p { font-size: 14.5px; color: var(--c-lav); }
-  .card:nth-child(2) h3::after { background: var(--c-pink); }
-  .card:nth-child(3) h3::after { background: var(--c-teal); }
+  /* ── Sections ── */
+  section h2 { font-size: clamp(28px, 4vw, 46px); letter-spacing: -0.03em; font-weight: 900; margin: 8px 0 10px; }
+  section .lead { color: var(--c-lav); max-width: 60ch; }
+  .row { display: grid; grid-template-columns: repeat(12, 1fr); gap: 28px; padding: 26px 0; }
 
-  .soon { grid-column: span 8; padding: clamp(30px, 4vw, 48px); display: flex; flex-direction: column; gap: 14px; align-items: flex-start; }
-  .soon h2 { font-size: clamp(26px, 3.4vw, 40px); letter-spacing: -0.03em; font-weight: 900; }
-  .soon p { color: var(--c-lav); }
-  .cta-block { grid-column: span 4; padding: clamp(30px, 4vw, 48px); display: flex; flex-direction: column; gap: 18px; justify-content: center; align-items: flex-start;
-               background: var(--c-violet); }
+  .newest { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 26px 0; }
+  .newcard { padding: 26px 24px; }
+  .newcard .n { color: var(--c-sun); font: 900 12px "SF Mono", ui-monospace, monospace; letter-spacing: .16em; }
+  .newcard h3 { font-size: 17.5px; font-weight: 900; margin: 10px 0 8px; letter-spacing: -0.01em; }
+  .newcard p { font-size: 14.5px; color: var(--c-lav); }
+  .newcard:nth-child(2) .n { color: var(--c-pink); }
+  .newcard:nth-child(3) .n { color: var(--c-teal); }
+  .newcard:nth-child(4) .n { color: var(--c-gold); }
+
+  .apps { display: grid; grid-template-columns: repeat(6, 1fr); gap: 20px; padding: 26px 0; }
+  .app { padding: 22px 12px; text-align: center; }
+  .app .ico { font-size: 34px; display: block; margin-bottom: 12px; }
+  .app b { font-size: 14px; font-weight: 800; display: block; }
+  .app span { font-size: 12.5px; color: var(--c-lav); display: block; margin-top: 4px; }
+
+  .faq { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 26px 0; }
+  .q { padding: 24px 26px; }
+  .q b { display: block; font-size: 15.5px; font-weight: 900; margin-bottom: 8px; color: var(--c-cream); }
+  .q p { font-size: 14.5px; color: var(--c-lav); }
+
+  .dlband { padding: clamp(34px, 5vw, 56px); display: flex; gap: 24px; align-items: center; justify-content: space-between; flex-wrap: wrap;
+    background: linear-gradient(0deg, var(--c-gold) 0 50%, var(--c-sun) 50% 100%); color: var(--c-black); }
+  .dlband h2 { color: var(--c-black); margin: 0; }
+  .dlband p { color: var(--c-brown); font-weight: 700; max-width: 46ch; }
 
   footer { text-align: center; padding: 48px 0 56px; color: var(--c-gray); font-size: 13.5px; }
 
   @media (max-width: 900px) {
-    .col-8, .col-4, .soon, .cta-block { grid-column: span 12; }
-    .features { grid-template-columns: 1fr; }
+    .col-8, .col-4 { grid-column: span 12; }
+    .newest, .faq { grid-template-columns: 1fr; }
+    .apps { grid-template-columns: repeat(2, 1fr); }
     .topbar .links { display: none; }
+    .deskbar { height: 46px; }
   }
   @media (prefers-reduced-motion: reduce) { .sun { animation: none; } }
 </style>
@@ -171,71 +171,117 @@
   <div class="in">
     <a class="logo" href="#">preli<b>xOS</b></a>
     <div class="links">
-      <a href="#features">Co potrafi</a>
-      <a href="#soon">Wkrótce</a>
+      <a href="#new">Co nowego</a>
+      <a href="#why">Dlaczego prelixOS</a>
+      <a href="#apps">Aplikacje</a>
+      <a href="#faq">FAQ</a>
     </div>
-    <a class="btn steps" href="https://github.com/gabeczkag/prelixOS" target="_blank" rel="noopener">GitHub</a>
+    <a class="btn steps" href="#download">Pobierz</a>
   </div>
 </header>
 
 <main class="wrap">
+
+  <!-- ── Hero: jedna fraza + subline + Pobierz + mockup pulpitu ── -->
   <section class="bento">
-    <div class="hero blk deep steps col-8">
+    <div class="hero blk deep steps col-12">
       <span class="tag steps">prelixOS</span>
-      <h1>Twój komputer.<br><span class="sunword">Wschodzi ze słońcem.</span></h1>
-      <p>prelixOS to szybki i lekki system na Twój sprzęt. Wstaje w kilka sekund,
-         działa płynnie nawet tam, gdzie inne systemy się dławią, i&nbsp;codziennie rano wygląda tak dobrze jak ten wschód słońca za oknem.</p>
+      <h1>Szybki, lekki system.<br><span class="sunword">Wschodzi ze słońcem.</span></h1>
+      <p class="sub">prelixOS to system operacyjny, który wstaje w kilka sekund, działa płynnie na każdym
+         sprzęcie i wygląda jak poranek — codziennie. Zainstalujesz go obok obecnego systemu i wrócisz
+         do niego z przyjemnością.</p>
       <div class="cta">
-        <a class="btn steps" href="https://github.com/gabeczkag/prelixOS" target="_blank" rel="noopener">Wypróbuj</a>
-        <a class="btn ghost steps" href="#features">Co potrafi ↓</a>
+        <a class="btn steps" href="#download">Pobierz prelixOS</a>
+        <a class="btn ghost steps" href="#new">Zobacz, co potrafi ↓</a>
+        <span class="ver">prelixOS 0.1 „Wschód” · darmowy</span>
       </div>
-    </div>
 
-    <div class="side col-4">
-      <div class="sunblock blk steps">
-        <span class="big">Start w kilka sekund.</span>
-        <p>Naciśasz przycisk, bierzesz kubek kawy — i wracasz do gotowego pulpitu. Bez kółka ładowania.</p>
-      </div>
-      <div class="miniblk blk steps rose">
-        <span class="k">Płynność</span>
-        <span class="v">Każdy piksel reaguje od ręki — bez zacięć i bez czekania.</span>
+      <div class="desk blk steps" style="filter:none; background: var(--c-night);" aria-hidden="true">
+        <div class="screen">
+          <div class="win">
+            <div class="bar"><s></s><s style="background: var(--c-lav);"></s><s style="background: var(--c-red);"></s><span>OKNO</span></div>
+            <div class="body">
+              <div class="hi">Witaj w prelixOS.</div>
+              <p>Wszystko pod ręką, wszystko szybko. Miłego dnia.</p>
+            </div>
+          </div>
+          <div class="deskbar">
+            <span class="start">preli</span>
+            <span class="app">📁</span><span class="app">🌐</span><span class="app">🎵</span><span class="app">🧮</span>
+            <span class="clock">6:00</span>
+          </div>
+        </div>
       </div>
     </div>
   </section>
 
-  <section class="features" id="features">
-    <div class="card blk deep steps">
-      <span class="ico">🪶</span>
-      <h3>Ekstra lekki</h3>
-      <p>Odrobina miejsca na dysku, skromne wymagania — ożywi nawet starszy komputer, o którym inni już zapomnieli.</p>
-    </div>
-    <div class="card blk deep steps">
-      <span class="ico">🌅</span>
-      <h3>Piękny od progu</h3>
-      <p>Kolorowy, spokojny pulpit, który po prostu cieszy oko — bez grzebania w ustawieniach.</p>
-    </div>
-    <div class="card blk deep steps">
-      <span class="ico">🧱</span>
-      <h3>Solidny fundament</h3>
-      <p>Zbudowany na nowych, sprawdzonych podstawach — bez zbędnego balastu z ostatnich czterdziestu lat.</p>
+  <!-- ── Co nowego ── -->
+  <section id="new">
+    <span class="tag steps">co nowego</span>
+    <h2>Co nowego w prelixOS 0.1</h2>
+    <p class="lead">Pierwsza publiczna wersja. Mało słów, dużo efektu — to, co ma działać, działa.</p>
+    <div class="newest">
+      <div class="newcard blk deep steps"><span class="n">START</span><h3>Kilka sekund do pulpitu</h3><p>Włączasz komputer i nie czekasz. Pulpit jest, zanim skończysz mrugać.</p></div>
+      <div class="newcard blk deep steps"><span class="n">LEKKOŚĆ</span><h3>Żyje na starym sprzęcie</h3><p>Laptopy sprzed dekady dostają drugie życie. Nic im nie trzeba w zamian.</p></div>
+      <div class="newcard blk deep steps"><span class="n">WYGLĄD</span><h3>Kolorowy pulpit od progu</h3><p>Ciepła paleta i spokojne bloki. Ładnie dziś, ładniej jutro.</p></div>
+      <div class="newcard blk deep steps"><span class="n">PRYWATNOŚĆ</span><h3>Twoje dane zostają u ciebie</h3><p>Zero podsłuchu, zero reklam. System pracuje dla ciebie, nie na kogoś.</p></div>
     </div>
   </section>
 
-  <section class="bento" id="soon">
-    <div class="soon blk deep steps">
-      <h2>Wkrótce</h2>
-      <p>Pracujemy nad tym, co robi system przyjemnym na co dzień: wygodne okna, więcej aplikacji,
-         multimedia i&nbsp;gładkie animacje. System rośnie z&nbsp;każdym dniem — dołącz, zanim wszyscy się dowiedzą.</p>
+  <!-- ── Dlaczego ── -->
+  <section id="why">
+    <span class="tag steps">dlaczego prelixos</span>
+    <h2>Dlaczego prelixOS jest inny</h2>
+    <p class="lead">Nie chcesz wiedzieć, jak jest zbudowany. Chcesz, żeby działał. Na to obstawiamy.</p>
+    <div class="newest">
+      <div class="newcard blk deep steps"><span class="n">PROSTO</span><h3>Wszystko działa od pierwszego dnia</h3><p>Instalujesz i używasz. Bez konfigurowania pół systemu zanim odpalisz przeglądarkę.</p></div>
+      <div class="newcard blk deep steps"><span class="n">SPOKÓJ</span><h3>Nie łamie się co tydzień</h3><p>Mało ruchomych części, mniej awarii. Aktualizacje pojawiają się, kiedy mają.</p></div>
+      <div class="newcard blk deep steps"><span class="n">DOM</span><h3>Twoje zasady</h3><p>Ten komputer jest twój. System nie stawia się między tobą a tym, co chcesz zrobić.</p></div>
+      <div class="newcard blk deep steps"><span class="n">ROZWÓJ</span><h3>Rosnie z każdym dniem</h3><p>Nowe wersje wychodzą regularnie i słuchamy, co mówisz.</p></div>
     </div>
-    <div class="cta-block blk sunlit steps">
-      <span class="k" style="font: 900 13px/1 'SF Mono', ui-monospace, monospace; letter-spacing:.16em; text-transform:uppercase; color:#ffd23c;">gotowy?</span>
-      <a class="btn steps" href="https://github.com/gabeczkag/prelixOS" target="_blank" rel="noopener">Zacznij dziś</a>
+  </section>
+
+  <!-- ── Aplikacje ── -->
+  <section id="apps">
+    <span class="tag steps">w zestawie</span>
+    <h2>Aplikacje, których potrzebujesz</h2>
+    <p class="lead">Bez bloatware. Tylko to, z czego korzystasz na co dzień — i szybki dostęp do tysięcy nowych.</p>
+    <div class="apps">
+      <div class="app blk deep steps"><span class="ico">📁</span><b>Pliki</b><span>porządek w sekundę</span></div>
+      <div class="app blk deep steps"><span class="ico">📝</span><b>Notatki</b><span>myśli łapane w locie</span></div>
+      <div class="app blk deep steps"><span class="ico">🎵</span><b>Muzyka</b><span> playlisty i radio</span></div>
+      <div class="app blk deep steps"><span class="ico">🌐</span><b>Przeglądarka</b><span>szybka i lekka</span></div>
+      <div class="app blk deep steps"><span class="ico">🧮</span><b>Kalkulator</b><span>zawsze pod ręką</span></div>
+      <div class="app blk deep steps"><span class="ico">⚙️</span><b>Ustawienia</b><span>dwa kliknięcia, nie dwadzieścia</span></div>
+    </div>
+  </section>
+
+  <!-- ── FAQ ── -->
+  <section id="faq">
+    <span class="tag steps">faq</span>
+    <h2>Pytania, które i tak padną</h2>
+    <div class="faq">
+      <div class="q blk deep steps"><b>Czy prelixOS jest darmowy?</b><p>Tak, całkowicie. Pobierasz, instalujesz, używasz — bez opłat i bez gwiazdek.</p></div>
+      <div class="q blk deep steps"><b>Czy zadziała na moim komputerze?</b><p>Na większości — od nowych laptopów po dziesięcioletnie maszynki. Wersja 0.1 jest lekka celowo.</p></div>
+      <div class="q blk deep steps"><b>Czy mogę zostawić stary system?</b><p>Tak. prelixOS instaluje się obok i przy starcie zapyta, co wolisz dziś włączyć.</p></div>
+      <div class="q blk deep steps"><b>Czy potrzebuję doświadczenia?</b><p>Nie. Jeśli umiesz używać przycisku Start, umiesz używać prelixOS.</p></div>
+    </div>
+  </section>
+
+  <!-- ── Download band ── -->
+  <section class="bento" id="download">
+    <div class="dlband blk steps col-12 sunlit" style="filter: drop-shadow(12px 12px 0 var(--c-black));">
+      <div>
+        <h2>Gotowy, żeby zobaczyć różnicę?</h2>
+        <p>Pobierz prelixOS 0.1 „Wschód", nagrój na pendrive i za kilka minut patrz, jak Twój komputer wschodzi.</p>
+      </div>
+      <a class="btn steps sunlit" href="https://github.com/gabeczkag/prelixOS" target="_blank" rel="noopener">Pobierz prelixOS</a>
     </div>
   </section>
 </main>
 
 <footer>
-  prelixOS · zrób sobie poranek na co dzień · gabeczkag.github.io/prelixOS
+  prelixOS · darmowy system na co dzień · gabeczkag.github.io/prelixOS · <a href="https://github.com/gabeczkag/prelixOS" style="color: var(--c-gray);">GitHub</a>
 </footer>
 
 </body>
