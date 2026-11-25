@@ -92,7 +92,7 @@ fn paint_text(
     if !font_size.is_finite() || font_size <= 0.0 {
         return;
     }
-    if !x.is_finite() || !y.is_finite() || w <= 0.0 || h <= 0.0 {
+    if !x.is_finite() || !y.is_finite() || !w.is_finite() || !h.is_finite() || w <= 0.0 || h <= 0.0 {
         return;
     }
 
@@ -141,20 +141,20 @@ fn paint_text(
                         continue;
                     }
                     // Alpha-over w przestrzeni premultiplied:
-                    // src = kolor * (cov/255) * (alpha/255), dst skracane o (1 - sa/255).
+                    // src = kolor * (alpha/255) * (cov/255), dst skracane o (1 - sa/255).
                     let sa = (style.color.a as u32 * cov) / 255;
                     let ia = 255 - sa;
                     if sa == 0 {
                         continue;
                     }
-                    let r = (style.color.r as u32 * cov) / 255
-                        + (pixels[py as usize * pw + px as usize].red() as u32 * ia) / 255;
-                    let g = (style.color.g as u32 * cov) / 255
-                        + (pixels[py as usize * pw + px as usize].green() as u32 * ia) / 255;
-                    let b = (style.color.b as u32 * cov) / 255
-                        + (pixels[py as usize * pw + px as usize].blue() as u32 * ia) / 255;
+                    let sr = (style.color.r as u32 * style.color.a as u32 * cov) / (255 * 255);
+                    let sg = (style.color.g as u32 * style.color.a as u32 * cov) / (255 * 255);
+                    let sb = (style.color.b as u32 * style.color.a as u32 * cov) / (255 * 255);
+                    let r = sr + (pixels[py as usize * pw + px as usize].red() as u32 * ia) / 255;
+                    let g = sg + (pixels[py as usize * pw + px as usize].green() as u32 * ia) / 255;
+                    let b = sb + (pixels[py as usize * pw + px as usize].blue() as u32 * ia) / 255;
                     let a = sa + (pixels[py as usize * pw + px as usize].alpha() as u32 * ia) / 255;
-                    // Składowe ≤ alpha z konstrukcji, więc `from_rgba` zawsze zwraca Some;
+                    // src ≤ sa i dst ≤ dst.a, więc składowe ≤ alpha z konstrukcji;
                     // mimo to nie unwrapujemy.
                     if let Some(c) = tiny_skia::PremultipliedColorU8::from_rgba(
                         r.min(255) as u8,
@@ -245,6 +245,46 @@ mod tests {
             })
         });
         assert!(found, "w prostokącie spana powinien być co najmniej 1 ciemny pixel");
+    }
+
+    #[test]
+    fn semitransparent_text_is_alpha_over() {
+        let doc = parse_html("<div><span>A</span></div>");
+        let sheet = parse_stylesheet("span { font-size: 24px; }");
+        let div = doc.children(doc.root())[0];
+        let span = doc.children(div)[0];
+        let text = doc.children(span)[0];
+        let mut styles = style_tree(&doc, &sheet, doc.root());
+        // Parser CSS nie ma jeszcze rgba() — kolor ustawiamy bezpośrednio
+        // w computed style: czerwony z alpha 128 na przezroczystym tle.
+        styles[text].color = Color { r: 255, g: 0, b: 0, a: 128 };
+        let font = test_font();
+        let laid_out = compute_layout(&doc, &styles, doc.root(), (200.0, 200.0), &font);
+        let pix = paint(&doc, &styles, &laid_out, (200, 200), &font);
+        let l = laid_out.iter().find(|l| l.node == text).unwrap();
+        let x0 = l.x.max(0.0) as u32;
+        let y0 = l.y.max(0.0) as u32;
+        let x1 = (l.x + l.w).min(pix.width() as f32) as u32;
+        let y1 = (l.y + l.h).min(pix.height() as f32) as u32;
+        let mut painted = 0;
+        for y in y0..y1 {
+            for x in x0..x1 {
+                let px = pix.pixel(x, y).unwrap();
+                assert!(
+                    px.red() <= px.alpha()
+                        && px.green() <= px.alpha()
+                        && px.blue() <= px.alpha(),
+                    "naruszona niezmiennik premultiplied w ({x},{y})"
+                );
+                if px.alpha() > 0 {
+                    painted += 1;
+                }
+            }
+        }
+        assert!(
+            painted > 0,
+            "półprzezroczysty tekst nie może gubić pikseli glifu"
+        );
     }
 
     fn lum(px: tiny_skia::PremultipliedColorU8) -> u32 {
